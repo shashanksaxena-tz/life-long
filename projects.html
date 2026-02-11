@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects - Life Long</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; line-height: 1.6; }
+a { color: #58a6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Navigation */
+nav { background: #161b22; border-bottom: 1px solid #30363d; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 2rem; position: sticky; top: 0; z-index: 100; }
+nav .brand { font-size: 1.2rem; font-weight: 700; color: #f0f6fc; }
+nav .links { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+nav .links a { color: #c9d1d9; font-size: 0.9rem; padding: 0.25rem 0.5rem; border-radius: 6px; transition: background 0.15s; }
+nav .links a:hover, nav .links a.active { background: #21262d; color: #f0f6fc; text-decoration: none; }
+
+/* Layout */
+.container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+h1 { font-size: 1.75rem; color: #f0f6fc; margin-bottom: 0.5rem; }
+.subtitle { color: #8b949e; margin-bottom: 1.5rem; font-size: 0.95rem; }
+
+/* Badges */
+.badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize; }
+.badge-done, .badge-active { background: #23863620; color: #3fb950; border: 1px solid #23863640; }
+.badge-in-progress { background: #d2992220; color: #d29922; border: 1px solid #d2992240; }
+.badge-todo { background: #8b949e20; color: #8b949e; border: 1px solid #8b949e40; }
+.badge-planning { background: #1f6feb20; color: #58a6ff; border: 1px solid #1f6feb40; }
+.badge-raw { background: #8957e520; color: #bc8cff; border: 1px solid #8957e540; }
+
+/* Tags */
+.tag { display: inline-block; padding: 0.1rem 0.5rem; background: #388bfd20; color: #58a6ff; border-radius: 12px; font-size: 0.7rem; margin: 0.15rem 0.15rem 0.15rem 0; border: 1px solid #388bfd40; }
+
+/* Filters */
+.filters { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
+.filter-btn { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 0.35rem 0.85rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.15s; }
+.filter-btn:hover { border-color: #58a6ff; color: #f0f6fc; }
+.filter-btn.active { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+
+/* Project Cards */
+.project-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; margin-bottom: 1rem; overflow: hidden; transition: border-color 0.15s; }
+.project-card:hover { border-color: #484f58; }
+.project-header { padding: 1.25rem; cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.project-header:hover { background: #1c2128; }
+.project-info { flex: 1; }
+.project-name { font-size: 1.1rem; font-weight: 600; color: #f0f6fc; margin-bottom: 0.5rem; }
+.project-meta { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; font-size: 0.85rem; color: #8b949e; }
+.project-tags { margin-top: 0.5rem; }
+.project-toggle { color: #8b949e; font-size: 1.2rem; padding: 0.25rem; transition: transform 0.2s; flex-shrink: 0; }
+.project-toggle.open { transform: rotate(90deg); }
+.project-body { padding: 0 1.25rem 1.25rem; border-top: 1px solid #21262d; display: none; }
+.project-body.open { display: block; padding-top: 1rem; }
+.project-body-content { font-size: 0.9rem; color: #c9d1d9; line-height: 1.7; white-space: pre-wrap; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 3rem; color: #8b949e; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  nav { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+  .project-header { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">Life Long</div>
+  <div class="links">
+    <a href="index.html">Dashboard</a>
+    <a href="projects.html" class="active">Projects</a>
+    <a href="tasks.html">Tasks</a>
+    <a href="logs.html">Logs</a>
+    <a href="ideas.html">Ideas</a>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>Projects</h1>
+  <p class="subtitle" id="project-count">Loading projects...</p>
+
+  <div class="filters" id="filters"></div>
+  <div id="projects-list">
+    <div class="empty-state">Loading...</div>
+  </div>
+</div>
+
+<script>
+var allProjects = [];
+var currentFilter = 'all';
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  var d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function badgeClass(status) {
+  if (!status) return 'badge-todo';
+  var s = status.toLowerCase().replace(/\s+/g, '-');
+  if (s === 'done' || s === 'active') return 'badge-done';
+  if (s === 'in-progress') return 'badge-in-progress';
+  if (s === 'planning') return 'badge-planning';
+  if (s === 'raw') return 'badge-raw';
+  return 'badge-todo';
+}
+
+function renderProjects(filter) {
+  currentFilter = filter;
+  var filtered = allProjects;
+  if (filter !== 'all') {
+    filtered = allProjects.filter(function(p) { return (p.status || '').toLowerCase() === filter; });
+  }
+
+  // Update filter button states
+  document.querySelectorAll('.filter-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+
+  var list = document.getElementById('projects-list');
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-state">No projects found.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(function(p, i) {
+    var tags = (p.tags || []).map(function(t) { return '<span class="tag">' + t + '</span>'; }).join('');
+    return '<div class="project-card" data-index="' + i + '">' +
+      '<div class="project-header" onclick="toggleProject(this)">' +
+        '<div class="project-info">' +
+          '<div class="project-name">' + (p.name || p.id) + '</div>' +
+          '<div class="project-meta">' +
+            '<span class="badge ' + badgeClass(p.status) + '">' + (p.status || 'unknown') + '</span>' +
+            '<span>Created ' + formatDate(p.created) + '</span>' +
+          '</div>' +
+          (tags ? '<div class="project-tags">' + tags + '</div>' : '') +
+        '</div>' +
+        '<span class="project-toggle">&#9654;</span>' +
+      '</div>' +
+      '<div class="project-body">' +
+        '<div class="project-body-content">' + (p.body || 'No description available.') + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function toggleProject(headerEl) {
+  var card = headerEl.closest('.project-card');
+  var body = card.querySelector('.project-body');
+  var toggle = card.querySelector('.project-toggle');
+  body.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+async function loadProjects() {
+  try {
+    var res = await fetch('data/index.json');
+    var data = await res.json();
+    allProjects = data.projects || [];
+
+    document.getElementById('project-count').textContent = allProjects.length + ' project' + (allProjects.length !== 1 ? 's' : '');
+
+    // Build filters
+    var statuses = {};
+    allProjects.forEach(function(p) {
+      var s = (p.status || 'unknown').toLowerCase();
+      statuses[s] = (statuses[s] || 0) + 1;
+    });
+
+    var filtersHtml = '<button class="filter-btn active" data-filter="all" onclick="renderProjects(\'all\')">All (' + allProjects.length + ')</button>';
+    Object.keys(statuses).forEach(function(s) {
+      filtersHtml += '<button class="filter-btn" data-filter="' + s + '" onclick="renderProjects(\'' + s + '\')">' + s.charAt(0).toUpperCase() + s.slice(1) + ' (' + statuses[s] + ')</button>';
+    });
+    document.getElementById('filters').innerHTML = filtersHtml;
+
+    renderProjects('all');
+  } catch (err) {
+    document.getElementById('projects-list').innerHTML = '<div class="empty-state" style="color:#f85149">Failed to load data. Make sure data/index.json exists.</div>';
+    console.error('Failed to load projects:', err);
+  }
+}
+
+loadProjects();
+</script>
+</body>
+</html>

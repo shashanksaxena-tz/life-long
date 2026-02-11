@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Life Long</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; line-height: 1.6; }
+a { color: #58a6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Navigation */
+nav { background: #161b22; border-bottom: 1px solid #30363d; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 2rem; position: sticky; top: 0; z-index: 100; }
+nav .brand { font-size: 1.2rem; font-weight: 700; color: #f0f6fc; }
+nav .links { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+nav .links a { color: #c9d1d9; font-size: 0.9rem; padding: 0.25rem 0.5rem; border-radius: 6px; transition: background 0.15s; }
+nav .links a:hover, nav .links a.active { background: #21262d; color: #f0f6fc; text-decoration: none; }
+
+/* Layout */
+.container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+h1 { font-size: 1.75rem; color: #f0f6fc; margin-bottom: 0.5rem; }
+.subtitle { color: #8b949e; margin-bottom: 1.5rem; font-size: 0.95rem; }
+
+/* Stats Cards */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.25rem; }
+.stat-card .stat-label { font-size: 0.8rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.25rem; }
+.stat-card .stat-value { font-size: 2rem; font-weight: 700; color: #f0f6fc; }
+.stat-card .stat-detail { font-size: 0.85rem; color: #8b949e; margin-top: 0.25rem; }
+
+/* Cards */
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+.card h3 { color: #f0f6fc; margin-bottom: 0.75rem; font-size: 1.1rem; }
+
+/* Badges */
+.badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize; }
+.badge-done, .badge-active { background: #23863620; color: #3fb950; border: 1px solid #23863640; }
+.badge-in-progress { background: #d2992220; color: #d29922; border: 1px solid #d2992240; }
+.badge-todo { background: #8b949e20; color: #8b949e; border: 1px solid #8b949e40; }
+.badge-planning { background: #1f6feb20; color: #58a6ff; border: 1px solid #1f6feb40; }
+.badge-raw { background: #8957e520; color: #bc8cff; border: 1px solid #8957e540; }
+
+/* Tags */
+.tag { display: inline-block; padding: 0.1rem 0.5rem; background: #388bfd20; color: #58a6ff; border-radius: 12px; font-size: 0.7rem; margin: 0.15rem 0.15rem 0.15rem 0; border: 1px solid #388bfd40; }
+
+/* Charts */
+.charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.chart-container { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1.25rem; }
+.chart-container h3 { color: #f0f6fc; margin-bottom: 1rem; font-size: 1rem; }
+.chart-wrapper { position: relative; max-height: 280px; display: flex; justify-content: center; }
+
+/* Activity */
+.activity-item { display: flex; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid #21262d; align-items: flex-start; }
+.activity-item:last-child { border-bottom: none; }
+.activity-date { font-size: 0.8rem; color: #8b949e; min-width: 90px; flex-shrink: 0; }
+.activity-text { font-size: 0.9rem; }
+
+/* Quick Links */
+.quick-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; margin-top: 1rem; }
+.quick-link { display: block; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; text-align: center; color: #c9d1d9; transition: border-color 0.15s, background 0.15s; }
+.quick-link:hover { border-color: #58a6ff; background: #1f6feb10; text-decoration: none; }
+.quick-link .ql-icon { font-size: 1.5rem; margin-bottom: 0.25rem; }
+.quick-link .ql-label { font-size: 0.9rem; }
+
+/* Section */
+.section { margin-bottom: 2rem; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.section-header h2 { color: #f0f6fc; font-size: 1.25rem; }
+
+/* Loading */
+.loading { text-align: center; padding: 3rem; color: #8b949e; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  nav { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .charts-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">Life Long</div>
+  <div class="links">
+    <a href="index.html" class="active">Dashboard</a>
+    <a href="projects.html">Projects</a>
+    <a href="tasks.html">Tasks</a>
+    <a href="logs.html">Logs</a>
+    <a href="ideas.html">Ideas</a>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>Dashboard</h1>
+  <p class="subtitle" id="generated-at">Loading...</p>
+
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card"><div class="stat-label">Projects</div><div class="stat-value" id="stat-projects">-</div><div class="stat-detail" id="stat-projects-detail"></div></div>
+    <div class="stat-card"><div class="stat-label">Tasks</div><div class="stat-value" id="stat-tasks">-</div><div class="stat-detail" id="stat-tasks-detail"></div></div>
+    <div class="stat-card"><div class="stat-label">Ideas</div><div class="stat-value" id="stat-ideas">-</div></div>
+    <div class="stat-card"><div class="stat-label">Logs</div><div class="stat-value" id="stat-logs">-</div><div class="stat-detail" id="stat-logs-detail"></div></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-container">
+      <h3>Task Status</h3>
+      <div class="chart-wrapper"><canvas id="taskPieChart"></canvas></div>
+    </div>
+    <div class="chart-container">
+      <h3>Projects by Status</h3>
+      <div class="chart-wrapper"><canvas id="projectBarChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h2>Recent Activity</h2>
+    </div>
+    <div class="card" id="recent-activity">
+      <div class="loading">Loading recent activity...</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h2>Quick Links</h2>
+    </div>
+    <div class="quick-links">
+      <a href="projects.html" class="quick-link"><div class="ql-icon">&#128193;</div><div class="ql-label">View Projects</div></a>
+      <a href="tasks.html" class="quick-link"><div class="ql-icon">&#9745;</div><div class="ql-label">View Tasks</div></a>
+      <a href="logs.html" class="quick-link"><div class="ql-icon">&#128221;</div><div class="ql-label">Daily Logs</div></a>
+      <a href="ideas.html" class="quick-link"><div class="ql-icon">&#128161;</div><div class="ql-label">Ideas Board</div></a>
+      <a href="https://github.com/OWNER/REPO/issues/new" class="quick-link" target="_blank"><div class="ql-icon">&#10133;</div><div class="ql-label">New Issue</div></a>
+    </div>
+  </div>
+</div>
+
+<script>
+let taskChart = null;
+let projectChart = null;
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function badgeClass(status) {
+  if (!status) return 'badge-todo';
+  const s = status.toLowerCase().replace(/\s+/g, '-');
+  if (s === 'done' || s === 'active') return 'badge-done';
+  if (s === 'in-progress') return 'badge-in-progress';
+  if (s === 'planning') return 'badge-planning';
+  if (s === 'raw') return 'badge-raw';
+  return 'badge-todo';
+}
+
+async function loadDashboard() {
+  try {
+    const res = await fetch('data/index.json');
+    const data = await res.json();
+    const stats = data.stats;
+
+    document.getElementById('generated-at').textContent = 'Last updated: ' + formatDate(data.generated_at);
+
+    document.getElementById('stat-projects').textContent = stats.total_projects;
+    document.getElementById('stat-projects-detail').textContent = stats.active_projects + ' active';
+    document.getElementById('stat-tasks').textContent = stats.total_tasks;
+    document.getElementById('stat-tasks-detail').textContent = stats.done_tasks + ' done, ' + stats.in_progress_tasks + ' in progress';
+    document.getElementById('stat-ideas').textContent = stats.total_ideas;
+    document.getElementById('stat-logs').textContent = stats.total_logs;
+    document.getElementById('stat-logs-detail').textContent = stats.logs_this_week + ' this week';
+
+    // Task pie chart
+    const taskCtx = document.getElementById('taskPieChart').getContext('2d');
+    taskChart = new Chart(taskCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Done', 'In Progress', 'Todo'],
+        datasets: [{
+          data: [stats.done_tasks, stats.in_progress_tasks, stats.todo_tasks],
+          backgroundColor: ['#238636', '#d29922', '#8b949e'],
+          borderColor: '#0d1117',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#c9d1d9', padding: 16, usePointStyle: true } }
+        }
+      }
+    });
+
+    // Project bar chart
+    const projectStatuses = {};
+    (data.projects || []).forEach(function(p) {
+      const s = p.status || 'unknown';
+      projectStatuses[s] = (projectStatuses[s] || 0) + 1;
+    });
+    const statusColors = { active: '#238636', planning: '#1f6feb', done: '#238636', archived: '#8b949e' };
+    const projectLabels = Object.keys(projectStatuses);
+    const projectData = Object.values(projectStatuses);
+    const projectColors = projectLabels.map(function(l) { return statusColors[l.toLowerCase()] || '#8b949e'; });
+
+    const projCtx = document.getElementById('projectBarChart').getContext('2d');
+    projectChart = new Chart(projCtx, {
+      type: 'bar',
+      data: {
+        labels: projectLabels.map(function(l) { return l.charAt(0).toUpperCase() + l.slice(1); }),
+        datasets: [{
+          label: 'Projects',
+          data: projectData,
+          backgroundColor: projectColors,
+          borderRadius: 4,
+          barThickness: 40
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          y: { beginAtZero: true, ticks: { color: '#8b949e', stepSize: 1 }, grid: { color: '#21262d' } },
+          x: { ticks: { color: '#8b949e' }, grid: { display: false } }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    // Recent activity
+    var activities = [];
+    (data.tasks || []).forEach(function(t) {
+      activities.push({ date: t.updated || t.created, text: '<span class="badge ' + badgeClass(t.status) + '">' + t.status + '</span> ' + t.title, type: 'task' });
+    });
+    (data.logs || []).forEach(function(l) {
+      var summary = l.body ? l.body.split('\n')[0].substring(0, 120) : 'Log entry';
+      activities.push({ date: l.date, text: summary, type: 'log' });
+    });
+    (data.ideas || []).forEach(function(i) {
+      var summary = i.body ? i.body.split('\n')[0].substring(0, 120) : 'New idea';
+      activities.push({ date: i.created, text: '<span class="badge ' + badgeClass(i.status) + '">' + (i.status || 'raw') + '</span> ' + summary, type: 'idea' });
+    });
+    activities.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+    activities = activities.slice(0, 10);
+
+    var actEl = document.getElementById('recent-activity');
+    if (activities.length === 0) {
+      actEl.innerHTML = '<p style="color:#8b949e">No recent activity.</p>';
+    } else {
+      actEl.innerHTML = activities.map(function(a) {
+        return '<div class="activity-item"><span class="activity-date">' + formatDate(a.date) + '</span><span class="activity-text">' + a.text + '</span></div>';
+      }).join('');
+    }
+  } catch (err) {
+    document.getElementById('recent-activity').innerHTML = '<p style="color:#f85149">Failed to load data. Make sure data/index.json exists.</p>';
+    console.error('Failed to load dashboard data:', err);
+  }
+}
+
+loadDashboard();
+</script>
+</body>
+</html>

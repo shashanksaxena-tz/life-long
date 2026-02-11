@@ -1,0 +1,56 @@
+name: Process Issue Input
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'input')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Process issue
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: python scripts/process_issue.py
+
+      - name: Run aggregation
+        run: python scripts/aggregate.py
+
+      - name: Create PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="input/issue-${{ github.event.issue.number }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add -A
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "feat: process issue #${{ github.event.issue.number }}"
+          git push -u origin "$BRANCH"
+          gh pr create \
+            --title "Input from issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}" \
+            --body "Auto-generated from issue #${{ github.event.issue.number }}. Review and merge to apply changes." \
+            --base main
+
+      - name: Close issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue close ${{ github.event.issue.number }} \
+            --comment "Processed! PR created. Review and merge to apply."

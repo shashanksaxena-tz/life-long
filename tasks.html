@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tasks - Life Long</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; line-height: 1.6; }
+a { color: #58a6ff; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Navigation */
+nav { background: #161b22; border-bottom: 1px solid #30363d; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 2rem; position: sticky; top: 0; z-index: 100; }
+nav .brand { font-size: 1.2rem; font-weight: 700; color: #f0f6fc; }
+nav .links { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+nav .links a { color: #c9d1d9; font-size: 0.9rem; padding: 0.25rem 0.5rem; border-radius: 6px; transition: background 0.15s; }
+nav .links a:hover, nav .links a.active { background: #21262d; color: #f0f6fc; text-decoration: none; }
+
+/* Layout */
+.container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+h1 { font-size: 1.75rem; color: #f0f6fc; margin-bottom: 0.5rem; }
+.subtitle { color: #8b949e; margin-bottom: 1.5rem; font-size: 0.95rem; }
+
+/* Badges */
+.badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize; }
+.badge-done, .badge-active { background: #23863620; color: #3fb950; border: 1px solid #23863640; }
+.badge-in-progress { background: #d2992220; color: #d29922; border: 1px solid #d2992240; }
+.badge-todo { background: #8b949e20; color: #8b949e; border: 1px solid #8b949e40; }
+.badge-planning { background: #1f6feb20; color: #58a6ff; border: 1px solid #1f6feb40; }
+.badge-raw { background: #8957e520; color: #bc8cff; border: 1px solid #8957e540; }
+
+/* Tags */
+.tag { display: inline-block; padding: 0.1rem 0.5rem; background: #388bfd20; color: #58a6ff; border-radius: 12px; font-size: 0.7rem; margin: 0.15rem 0.15rem 0.15rem 0; border: 1px solid #388bfd40; }
+
+/* Filters */
+.filters { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+.filters label { font-size: 0.85rem; color: #8b949e; }
+.filter-btn { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 0.35rem 0.85rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.15s; }
+.filter-btn:hover { border-color: #58a6ff; color: #f0f6fc; }
+.filter-btn.active { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+.filter-select { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+.filter-select:focus { border-color: #58a6ff; outline: none; }
+.filter-row { display: flex; gap: 0.5rem; align-items: center; }
+
+/* Sort */
+.sort-bar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; align-items: center; flex-wrap: wrap; }
+.sort-btn { background: none; color: #8b949e; border: none; cursor: pointer; font-size: 0.85rem; padding: 0.25rem 0.5rem; border-radius: 4px; transition: all 0.15s; }
+.sort-btn:hover { color: #f0f6fc; }
+.sort-btn.active { color: #58a6ff; font-weight: 600; }
+
+/* Task Cards */
+.task-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; transition: border-color 0.15s; }
+.task-card:hover { border-color: #484f58; }
+.task-title { font-size: 1rem; font-weight: 600; color: #f0f6fc; margin-bottom: 0.5rem; }
+.task-meta { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; font-size: 0.85rem; color: #8b949e; margin-bottom: 0.5rem; }
+.task-body { font-size: 0.85rem; color: #8b949e; margin-top: 0.5rem; white-space: pre-wrap; line-height: 1.6; border-top: 1px solid #21262d; padding-top: 0.75rem; display: none; }
+.task-body.open { display: block; }
+.task-card.clickable { cursor: pointer; }
+.task-tags { margin-top: 0.4rem; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 3rem; color: #8b949e; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  nav { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+  .filters { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">Life Long</div>
+  <div class="links">
+    <a href="index.html">Dashboard</a>
+    <a href="projects.html">Projects</a>
+    <a href="tasks.html" class="active">Tasks</a>
+    <a href="logs.html">Logs</a>
+    <a href="ideas.html">Ideas</a>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>Tasks</h1>
+  <p class="subtitle" id="task-count">Loading tasks...</p>
+
+  <div class="filters" id="status-filters"></div>
+
+  <div class="filters">
+    <div class="filter-row">
+      <label>Project:</label>
+      <select class="filter-select" id="project-filter" onchange="applyFilters()">
+        <option value="all">All Projects</option>
+      </select>
+    </div>
+    <div class="filter-row">
+      <label>Tag:</label>
+      <select class="filter-select" id="tag-filter" onchange="applyFilters()">
+        <option value="all">All Tags</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sort-bar">
+    <span style="font-size:0.85rem;color:#8b949e">Sort by:</span>
+    <button class="sort-btn active" data-sort="updated" onclick="setSort('updated')">Updated</button>
+    <button class="sort-btn" data-sort="created" onclick="setSort('created')">Created</button>
+    <button class="sort-btn" data-sort="title" onclick="setSort('title')">Title</button>
+  </div>
+
+  <div id="tasks-list">
+    <div class="empty-state">Loading...</div>
+  </div>
+</div>
+
+<script>
+var allTasks = [];
+var currentStatusFilter = 'all';
+var currentSort = 'updated';
+var sortAsc = false;
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  var d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function badgeClass(status) {
+  if (!status) return 'badge-todo';
+  var s = status.toLowerCase().replace(/\s+/g, '-');
+  if (s === 'done' || s === 'active') return 'badge-done';
+  if (s === 'in-progress') return 'badge-in-progress';
+  if (s === 'planning') return 'badge-planning';
+  if (s === 'raw') return 'badge-raw';
+  return 'badge-todo';
+}
+
+function setSort(field) {
+  if (currentSort === field) {
+    sortAsc = !sortAsc;
+  } else {
+    currentSort = field;
+    sortAsc = false;
+  }
+  document.querySelectorAll('.sort-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.sort === field);
+  });
+  applyFilters();
+}
+
+function applyFilters() {
+  var statusFilter = currentStatusFilter;
+  var projectFilter = document.getElementById('project-filter').value;
+  var tagFilter = document.getElementById('tag-filter').value;
+
+  var filtered = allTasks.filter(function(t) {
+    if (statusFilter !== 'all' && (t.status || '').toLowerCase().replace(/\s+/g, '-') !== statusFilter) return false;
+    if (projectFilter !== 'all' && t.project !== projectFilter) return false;
+    if (tagFilter !== 'all' && (t.tags || []).indexOf(tagFilter) === -1) return false;
+    return true;
+  });
+
+  // Sort
+  filtered.sort(function(a, b) {
+    var valA, valB;
+    if (currentSort === 'title') {
+      valA = (a.title || '').toLowerCase();
+      valB = (b.title || '').toLowerCase();
+      return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    } else {
+      valA = new Date(a[currentSort] || a.created || 0);
+      valB = new Date(b[currentSort] || b.created || 0);
+      return sortAsc ? valA - valB : valB - valA;
+    }
+  });
+
+  renderTasks(filtered);
+}
+
+function setStatusFilter(filter) {
+  currentStatusFilter = filter;
+  document.querySelectorAll('#status-filters .filter-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  applyFilters();
+}
+
+function toggleTaskBody(el) {
+  var body = el.querySelector('.task-body');
+  if (body) body.classList.toggle('open');
+}
+
+function renderTasks(tasks) {
+  var list = document.getElementById('tasks-list');
+  if (tasks.length === 0) {
+    list.innerHTML = '<div class="empty-state">No tasks match the current filters.</div>';
+    return;
+  }
+
+  list.innerHTML = tasks.map(function(t) {
+    var tags = (t.tags || []).map(function(tag) { return '<span class="tag">' + tag + '</span>'; }).join('');
+    var hasBody = t.body && t.body.trim();
+    return '<div class="task-card' + (hasBody ? ' clickable' : '') + '"' + (hasBody ? ' onclick="toggleTaskBody(this)"' : '') + '>' +
+      '<div class="task-title">' + (t.title || t.id) + '</div>' +
+      '<div class="task-meta">' +
+        '<span class="badge ' + badgeClass(t.status) + '">' + (t.status || 'todo') + '</span>' +
+        (t.project ? '<span>Project: <a href="projects.html" onclick="event.stopPropagation()">' + t.project + '</a></span>' : '') +
+        '<span>Updated ' + formatDate(t.updated || t.created) + '</span>' +
+      '</div>' +
+      (tags ? '<div class="task-tags">' + tags + '</div>' : '') +
+      (hasBody ? '<div class="task-body">' + t.body + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+async function loadTasks() {
+  try {
+    var res = await fetch('data/index.json');
+    var data = await res.json();
+    allTasks = data.tasks || [];
+
+    document.getElementById('task-count').textContent = allTasks.length + ' task' + (allTasks.length !== 1 ? 's' : '');
+
+    // Build status filters
+    var statuses = {};
+    allTasks.forEach(function(t) {
+      var s = (t.status || 'todo').toLowerCase().replace(/\s+/g, '-');
+      statuses[s] = (statuses[s] || 0) + 1;
+    });
+    var filtersHtml = '<button class="filter-btn active" data-filter="all" onclick="setStatusFilter(\'all\')">All (' + allTasks.length + ')</button>';
+    Object.keys(statuses).forEach(function(s) {
+      var label = s.replace(/-/g, ' ');
+      label = label.charAt(0).toUpperCase() + label.slice(1);
+      filtersHtml += '<button class="filter-btn" data-filter="' + s + '" onclick="setStatusFilter(\'' + s + '\')">' + label + ' (' + statuses[s] + ')</button>';
+    });
+    document.getElementById('status-filters').innerHTML = filtersHtml;
+
+    // Build project filter dropdown
+    var projects = {};
+    allTasks.forEach(function(t) { if (t.project) projects[t.project] = true; });
+    var projSelect = document.getElementById('project-filter');
+    Object.keys(projects).sort().forEach(function(p) {
+      var opt = document.createElement('option');
+      opt.value = p;
+      opt.textContent = p;
+      projSelect.appendChild(opt);
+    });
+
+    // Build tag filter dropdown
+    var tags = {};
+    allTasks.forEach(function(t) { (t.tags || []).forEach(function(tag) { tags[tag] = true; }); });
+    var tagSelect = document.getElementById('tag-filter');
+    Object.keys(tags).sort().forEach(function(tag) {
+      var opt = document.createElement('option');
+      opt.value = tag;
+      opt.textContent = tag;
+      tagSelect.appendChild(opt);
+    });
+
+    applyFilters();
+  } catch (err) {
+    document.getElementById('tasks-list').innerHTML = '<div class="empty-state" style="color:#f85149">Failed to load data. Make sure data/index.json exists.</div>';
+    console.error('Failed to load tasks:', err);
+  }
+}
+
+loadTasks();
+</script>
+</body>
+</html>

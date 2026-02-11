@@ -1,0 +1,106 @@
+{
+  "generated_at": "2026-02-11T12:15:52.313822",
+  "stats": {
+    "total_projects": 2,
+    "active_projects": 1,
+    "total_tasks": 3,
+    "done_tasks": 1,
+    "in_progress_tasks": 1,
+    "todo_tasks": 1,
+    "total_ideas": 1,
+    "total_logs": 1,
+    "logs_this_week": 1,
+    "all_tags": [
+      "backend",
+      "bug",
+      "data",
+      "design",
+      "feature",
+      "frontend",
+      "product",
+      "security"
+    ]
+  },
+  "projects": [
+    {
+      "id": "analytics-engine",
+      "name": "Analytics Engine",
+      "status": "planning",
+      "created": "2026-02-10",
+      "tags": [
+        "frontend",
+        "data"
+      ],
+      "body": "## Description\nFrontend analytics dashboard with real-time data visualization.\n\n## Stats\n- Total tasks: 1\n- Completed: 0"
+    },
+    {
+      "id": "auth-service",
+      "name": "Auth Service",
+      "status": "active",
+      "created": "2026-02-01",
+      "tags": [
+        "backend",
+        "security"
+      ],
+      "body": "## Description\nHandles authentication and authorization.\n\n## Stats\n- Total tasks: 4\n- Completed: 2"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-2026-001",
+      "project": "auth-service",
+      "title": "Fix JWT refresh expiry bug",
+      "status": "done",
+      "created": "2026-02-11",
+      "updated": "2026-02-11",
+      "tags": [
+        "bug",
+        "backend"
+      ],
+      "body": "## Description\nRefresh token expired incorrectly after 15 mins.\n\n## Logs\n- 2026-02-11: Investigated issue.\n- 2026-02-11: Patched expiry logic."
+    },
+    {
+      "id": "task-2026-002",
+      "project": "auth-service",
+      "title": "Build filter UI for dashboard",
+      "status": "in-progress",
+      "created": "2026-02-11",
+      "updated": "2026-02-11",
+      "tags": [
+        "feature",
+        "frontend"
+      ],
+      "body": "## Description\nCreate filterable table UI for the admin dashboard.\n\n## Logs\n- 2026-02-11: Built initial filter UI components."
+    },
+    {
+      "id": "task-2026-003",
+      "project": "analytics-engine",
+      "title": "Design data model for analytics events",
+      "status": "todo",
+      "created": "2026-02-11",
+      "updated": "2026-02-11",
+      "tags": [
+        "design",
+        "data"
+      ],
+      "body": "## Description\nDefine the schema for analytics event ingestion and storage.\n\n## Logs\n- 2026-02-11: Created task."
+    }
+  ],
+  "logs": [
+    {
+      "date": "2026-02-11",
+      "body": "## Summary\nWorked on auth and dashboard.\n\n## Entries\n- Fixed JWT bug (task-2026-001)\n- Built filter UI (task-2026-002)"
+    }
+  ],
+  "ideas": [
+    {
+      "id": "idea-2026-003",
+      "status": "raw",
+      "created": "2026-02-11",
+      "tags": [
+        "product"
+      ],
+      "body": "## Idea\nBuild AI-powered productivity intelligence system."
+    }
+  ]
+}
