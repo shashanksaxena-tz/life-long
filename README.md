@@ -11,21 +11,21 @@ A personal productivity system built entirely on free GitHub infrastructure. Zer
 ## How It Works
 
 ```
-You (static site forms / GitHub issues / Telegram bot)
-  │
-  ▼
+You (static site forms / GitHub issues / Telegram bot / natural language)
+  |
+  v
 GitHub Issues API (with "input" label)
-  │
-  ▼
+  |
+  v
 GitHub Actions (process-issue.yml)
-  ├── Parses issue title + body
-  ├── Creates/updates markdown files
-  ├── Runs aggregation → data/index.json
-  └── Pushes to branch → triggers deploy
-        │
-        ▼
+  +-- Parses issue title + body (template or AI-powered)
+  +-- Creates/updates markdown files
+  +-- Runs aggregation -> data/index.json
+  +-- Pushes to branch -> triggers deploy
+        |
+        v
   GitHub Pages (static HTML site)
-  └── Reads data/index.json client-side
+  +-- Reads data/index.json client-side
 ```
 
 No server. No database. No build step. Just markdown files, Python scripts, and vanilla HTML/JS.
@@ -33,63 +33,110 @@ No server. No database. No build step. Just markdown files, Python scripts, and 
 ## Features
 
 ### Static Dashboard Site
-- **Dashboard** — Stats cards, task status doughnut chart, project bar chart, recent activity feed
-- **Projects** — Filterable card view with status badges, expandable descriptions
-- **Tasks** — Filter by status/project/tag, sort by updated/created/title, expandable details
-- **Logs** — Daily log entries with inline markdown rendering
-- **Ideas** — Card grid with status and tag filtering
+- **Dashboard** -- Stats cards, task status doughnut chart, project bar chart, recent activity feed, logging streak tracker, weekly productivity score, overdue/due-soon task alerts
+- **Projects** -- Filterable card view with status badges, expandable descriptions, live task completion counts
+- **Tasks** -- Filter by status/project/tag/priority, sort by updated/created/title/priority/due date, expandable details, overdue highlighting
+- **Logs** -- Daily log entries with inline markdown rendering, searchable
+- **Ideas** -- Card grid with status and tag filtering, searchable
+
+### Search & Filter
+Every listing page has a **search bar** that filters items in real-time across titles, tags, bodies, and metadata. Press `/` to focus the search bar from anywhere.
+
+### Priority & Due Dates
+Tasks support **priority levels** (low, medium, high, critical) and **due dates** with:
+- Color-coded priority badges
+- Overdue and due-soon visual indicators (red/yellow left border)
+- "Upcoming & Overdue" section on the dashboard
+- Sort by priority or due date on the tasks page
 
 ### Inline Forms (No GitHub Required)
 Every page has a **"+ Add"** button in the nav that opens a modal with forms for:
 - Create Project (name, tags, description)
-- Create Task (title, project dropdown, tags, description)
+- Create Task (title, project, priority, due date, tags, description)
 - Add Log Entry (summary)
 - Add Idea (text, tags)
 - Update Task Status (task dropdown, status dropdown)
 
 Forms call the GitHub Issues API directly from the browser. Configure your GitHub token once via the **gear icon** in the nav.
 
+### Data Export
+Every listing page has **JSON** and **CSV** export buttons. The dashboard can export the complete dataset as JSON or all tasks as CSV.
+
+### Keyboard Shortcuts
+| Key | Action |
+|-----|--------|
+| `g d` | Go to Dashboard |
+| `g p` | Go to Projects |
+| `g t` | Go to Tasks |
+| `g l` | Go to Logs |
+| `g i` | Go to Ideas |
+| `n` | Open "Add New" modal |
+| `/` | Focus search bar |
+| `?` | Toggle shortcut help panel |
+| `Esc` | Close modal |
+
+### Streak Tracker & Productivity Score
+The dashboard shows:
+- **Current logging streak** -- consecutive days with log entries
+- **Longest streak** -- your personal best
+- **30-day activity heatmap** -- visual calendar of active days
+- **Weekly productivity score** -- based on tasks completed, created, and log entries
+
+### PWA Support
+The site works as a **Progressive Web App** -- add it to your home screen for an app-like experience with offline support via service worker caching.
+
 ### Automated Pipeline
-- **Issue processing** — Issues with the `input` label are parsed and converted to markdown files
-- **Aggregation** — `scripts/aggregate.py` collects all markdown into `data/index.json`
-- **Deployment** — GitHub Pages deploys automatically on every push
+- **Issue processing** -- Issues with the `input` label are parsed and converted to markdown files
+- **Aggregation** -- `scripts/aggregate.py` collects all markdown into `data/index.json` (includes overdue/due-soon counts, priority stats)
+- **Deployment** -- GitHub Pages deploys automatically on every push
+
+### AI-Powered Parsing (Optional)
+Set the `OPENROUTER_API_KEY` secret to enable **natural language issue parsing**. Instead of structured prefixes like "Create Task:", you can write free-form text and the AI will determine intent. Falls back to template parsing if the API key is not set or the request fails. **Completely non-blocking.**
+
+### Telegram Bot (Optional)
+Send messages to a Telegram bot to create issues from your phone:
+- `task: Fix the login bug` -> Creates a task
+- `log: Worked on dashboard` -> Creates a log entry
+- `idea: Build mobile app` -> Creates an idea
+- Free text -> Treated as a log entry
+
+Requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` secrets. **Completely non-blocking.**
 
 ### Issue Templates
 Pre-built GitHub issue forms for structured input:
-- Create Project, Create Task, Add Log Entry, Add Idea, Update Task
+- Create Project, Create Task (with priority + due date), Add Log Entry, Add Idea, Update Task
 
 ## Repo Structure
 
 ```
 life-long/
-├── index.html              Dashboard
-├── projects.html           Projects listing
-├── tasks.html              Tasks listing
-├── logs.html               Daily logs
-├── ideas.html              Ideas board
-├── app.js                  Inline forms, settings, GitHub API integration
-├── data/
-│   └── index.json          Auto-generated aggregate data (consumed by HTML)
-├── projects/               Project markdown files
-│   ├── auth-service.md
-│   └── analytics-engine.md
-├── tasks/                  Task markdown files
-│   ├── task-2026-001.md
-│   ├── task-2026-002.md
-│   └── task-2026-003.md
-├── logs/                   Daily log markdown files
-│   └── 2026-02-11.md
-├── ideas/                  Idea markdown files
-│   └── idea-2026-003.md
-├── scripts/
-│   ├── process_issue.py    Parses GitHub issues into markdown files
-│   └── aggregate.py        Aggregates markdown into data/index.json
-└── .github/
-    ├── ISSUE_TEMPLATE/     Issue form templates (5 types)
-    └── workflows/
-        ├── deploy.yml      GitHub Pages deployment
-        ├── aggregate.yml   Data aggregation on content changes
-        └── process-issue.yml  Issue processing pipeline
++-- index.html              Dashboard (streak, productivity, charts, due tasks)
++-- projects.html           Projects listing (with task counts)
++-- tasks.html              Tasks listing (priority, due dates, search)
++-- logs.html               Daily logs (searchable)
++-- ideas.html              Ideas board (searchable)
++-- style.css               Shared styles (single source of truth)
++-- utils.js                Shared utilities (formatDate, badgeClass, search, export, streak)
++-- app.js                  Inline forms, settings, GitHub API integration, service worker
++-- sw.js                   Service worker for offline/PWA support
++-- manifest.json           PWA manifest
++-- data/
+|   +-- index.json          Auto-generated aggregate data (consumed by HTML)
++-- projects/               Project markdown files
++-- tasks/                  Task markdown files (with priority + due fields)
++-- logs/                   Daily log markdown files
++-- ideas/                  Idea markdown files
++-- scripts/
+|   +-- process_issue.py    Parses GitHub issues into markdown (with AI support)
+|   +-- aggregate.py        Aggregates markdown into data/index.json
+|   +-- telegram_webhook.py Telegram bot message handler
++-- .github/
+    +-- ISSUE_TEMPLATE/     Issue form templates (5 types)
+    +-- workflows/
+        +-- deploy.yml      GitHub Pages deployment
+        +-- aggregate.yml   Data aggregation on content changes
+        +-- process-issue.yml  Issue processing pipeline (with AI)
+        +-- telegram-bot.yml   Telegram bot webhook handler
 ```
 
 ## Setup
@@ -101,7 +148,7 @@ Go to **Settings > General > Default branch** and set it to your working branch.
 Go to **Settings > Pages > Source** and select **"GitHub Actions"** (not "Deploy from a branch").
 
 ### 3. Create the `input` Label
-Go to **Issues > Labels > New label** — name it `input`.
+Go to **Issues > Labels > New label** -- name it `input`.
 
 ### 4. Create a GitHub Personal Access Token
 Go to **GitHub > Settings > Developer settings > Personal access tokens > Generate**.
@@ -112,6 +159,14 @@ Open the deployed site, click the **gear icon** in the nav, enter your token and
 
 ### 6. Start Using
 Click **"+ Add"** on any page to create projects, tasks, logs, and ideas directly from the site.
+
+### Optional: AI-Powered Parsing
+Add the `OPENROUTER_API_KEY` secret to your repository to enable natural language parsing of issues.
+
+### Optional: Telegram Bot
+1. Create a bot via [@BotFather](https://t.me/BotFather)
+2. Add `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` secrets
+3. Trigger the `telegram-bot.yml` workflow via dispatch with your message
 
 ## File Schemas
 
@@ -136,6 +191,8 @@ status: done            # todo | in-progress | done
 created: 2026-02-11
 updated: 2026-02-11
 tags: [bug, backend]
+priority: high          # low | medium | high | critical (optional)
+due: 2026-02-15         # YYYY-MM-DD (optional)
 ---
 ```
 
@@ -162,7 +219,8 @@ tags: [product]
 |----------|---------|--------------|
 | `deploy.yml` | Any push to branch | Deploys entire repo to GitHub Pages |
 | `aggregate.yml` | Push changing `projects/`, `tasks/`, `logs/`, `ideas/` | Regenerates `data/index.json` |
-| `process-issue.yml` | Issue opened with `input` label | Parses issue, creates files, pushes, closes issue |
+| `process-issue.yml` | Issue opened with `input` label | Parses issue (template or AI), creates files, pushes, closes issue |
+| `telegram-bot.yml` | Workflow dispatch | Processes Telegram message into GitHub issue |
 
 ## Cost
 
@@ -172,4 +230,6 @@ tags: [product]
 | GitHub Pages | Free |
 | GitHub Actions | Free (2,000 mins/month) |
 | Static site (no framework) | Free |
-| **Total** | **$0** |
+| AI parsing (optional) | Pay-per-use via OpenRouter |
+| Telegram bot (optional) | Free |
+| **Total** | **$0** (core features) |

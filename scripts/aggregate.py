@@ -97,6 +97,31 @@ def compute_stats(projects: list, tasks: list, logs: list, ideas: list) -> dict:
         if isinstance(tags, list):
             all_tags.update(tags)
 
+    # Count overdue and due-soon tasks
+    overdue_tasks = 0
+    due_soon_tasks = 0
+    for t in tasks:
+        if t.get("status") == "done":
+            continue
+        due = t.get("due", "")
+        if due:
+            try:
+                due_date = datetime.strptime(due, "%Y-%m-%d").date()
+                diff = (due_date - today).days
+                if diff < 0:
+                    overdue_tasks += 1
+                elif diff <= 3:
+                    due_soon_tasks += 1
+            except (ValueError, TypeError):
+                pass
+
+    # Count tasks by priority
+    priority_counts = {}
+    for t in tasks:
+        p = t.get("priority", "")
+        if p:
+            priority_counts[p] = priority_counts.get(p, 0) + 1
+
     return {
         "total_projects": len(projects),
         "active_projects": active_projects,
@@ -104,6 +129,9 @@ def compute_stats(projects: list, tasks: list, logs: list, ideas: list) -> dict:
         "done_tasks": done_tasks,
         "in_progress_tasks": in_progress_tasks,
         "todo_tasks": todo_tasks,
+        "overdue_tasks": overdue_tasks,
+        "due_soon_tasks": due_soon_tasks,
+        "priority_counts": priority_counts,
         "total_ideas": len(ideas),
         "total_logs": len(logs),
         "logs_this_week": recent_logs,

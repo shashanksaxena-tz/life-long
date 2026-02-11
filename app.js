@@ -278,6 +278,10 @@
     container.innerHTML =
       '<div class="ll-form-group"><label>Task Title *</label><input class="ll-input" id="ll-f-title" placeholder="e.g. Fix OAuth redirect bug"></div>' +
       '<div class="ll-form-group"><label>Project *</label><select class="ll-select" id="ll-f-project">' + opts + '</select></div>' +
+      '<div style="display:flex;gap:0.75rem">' +
+        '<div class="ll-form-group" style="flex:1"><label>Priority</label><select class="ll-select" id="ll-f-priority"><option value="">None</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option></select></div>' +
+        '<div class="ll-form-group" style="flex:1"><label>Due Date</label><input type="date" class="ll-input" id="ll-f-due"></div>' +
+      '</div>' +
       '<div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. bug, backend"></div>' +
       '<div class="ll-form-group"><label>Description</label><textarea class="ll-textarea" id="ll-f-desc" placeholder="What needs to be done?"></textarea></div>' +
       '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Task</button></div>';
@@ -290,9 +294,13 @@
       if (!project) { showToast('Please select a project.', 'error'); return; }
       var tags = container.querySelector('#ll-f-tags').value.trim();
       var desc = container.querySelector('#ll-f-desc').value.trim();
+      var priority = container.querySelector('#ll-f-priority').value;
+      var due = container.querySelector('#ll-f-due').value;
 
       var title = 'Create Task: ' + taskTitle;
       var body = '### Task Title\n\n' + taskTitle + '\n\n### Project\n\n' + project;
+      if (priority) body += '\n\n### Priority\n\n' + priority;
+      if (due) body += '\n\n### Due Date\n\n' + due;
       if (tags) body += '\n\n### Tags\n\n' + tags;
       if (desc) body += '\n\n### Description\n\n' + desc;
 
@@ -463,10 +471,18 @@
   window.llShowAddModal = showAddModal;
   window.llShowSettings = showSettingsModal;
 
+  // --- Service Worker ---
+  function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(function() {});
+    }
+  }
+
   // --- Init ---
   function init() {
     injectStyles();
     injectNavButtons();
+    registerServiceWorker();
   }
 
   if (document.readyState === 'loading') {

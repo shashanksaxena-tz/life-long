@@ -4,62 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Logs - Life Long</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; line-height: 1.6; }
-a { color: #58a6ff; text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-/* Navigation */
-nav { background: #161b22; border-bottom: 1px solid #30363d; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 2rem; position: sticky; top: 0; z-index: 100; }
-nav .brand { font-size: 1.2rem; font-weight: 700; color: #f0f6fc; }
-nav .links { display: flex; gap: 1.25rem; flex-wrap: wrap; }
-nav .links a { color: #c9d1d9; font-size: 0.9rem; padding: 0.25rem 0.5rem; border-radius: 6px; transition: background 0.15s; }
-nav .links a:hover, nav .links a.active { background: #21262d; color: #f0f6fc; text-decoration: none; }
-
-/* Layout */
-.container { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
-h1 { font-size: 1.75rem; color: #f0f6fc; margin-bottom: 0.5rem; }
-.subtitle { color: #8b949e; margin-bottom: 1.5rem; font-size: 0.95rem; }
-
-/* Log Entry */
-.log-entry { background: #161b22; border: 1px solid #30363d; border-radius: 8px; margin-bottom: 1.25rem; overflow: hidden; }
-.log-header { padding: 1rem 1.25rem; border-bottom: 1px solid #21262d; display: flex; justify-content: space-between; align-items: center; }
-.log-date { font-size: 1.1rem; font-weight: 600; color: #f0f6fc; }
-.log-day { font-size: 0.85rem; color: #8b949e; }
-.log-body { padding: 1.25rem; font-size: 0.9rem; line-height: 1.8; }
-
-/* Markdown rendering */
-.log-body h1, .log-body h2, .log-body h3, .log-body h4 { color: #f0f6fc; margin: 1rem 0 0.5rem; }
-.log-body h1 { font-size: 1.4rem; border-bottom: 1px solid #21262d; padding-bottom: 0.4rem; }
-.log-body h2 { font-size: 1.2rem; border-bottom: 1px solid #21262d; padding-bottom: 0.3rem; }
-.log-body h3 { font-size: 1.05rem; }
-.log-body p { margin-bottom: 0.75rem; }
-.log-body ul, .log-body ol { margin: 0.5rem 0 0.75rem 1.5rem; }
-.log-body li { margin-bottom: 0.3rem; }
-.log-body code { background: #21262d; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; color: #f0f6fc; }
-.log-body pre { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; overflow-x: auto; margin: 0.75rem 0; }
-.log-body pre code { background: none; padding: 0; }
-.log-body blockquote { border-left: 3px solid #30363d; padding-left: 1rem; color: #8b949e; margin: 0.75rem 0; }
-.log-body strong { color: #f0f6fc; }
-.log-body hr { border: none; border-top: 1px solid #21262d; margin: 1rem 0; }
-.log-body a { color: #58a6ff; }
-.log-body img { max-width: 100%; border-radius: 6px; }
-.log-body table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; }
-.log-body th, .log-body td { border: 1px solid #30363d; padding: 0.4rem 0.75rem; text-align: left; }
-.log-body th { background: #21262d; color: #f0f6fc; }
-
-/* Timeline */
-.timeline-marker { width: 12px; height: 12px; background: #30363d; border-radius: 50%; border: 2px solid #58a6ff; flex-shrink: 0; }
-
-/* Empty state */
-.empty-state { text-align: center; padding: 3rem; color: #8b949e; }
-
-/* Responsive */
-@media (max-width: 768px) {
-  nav { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
-}
-</style>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d1117">
 </head>
 <body>
 <nav>
@@ -73,142 +20,87 @@ h1 { font-size: 1.75rem; color: #f0f6fc; margin-bottom: 0.5rem; }
   </div>
 </nav>
 
-<div class="container">
+<div class="container-narrow">
   <h1>Daily Logs</h1>
   <p class="subtitle" id="log-count">Loading logs...</p>
+
+  <div class="search-bar">
+    <input type="text" class="search-input" id="search-input" placeholder="Search logs... (press / to focus)" oninput="filterLogs()">
+    <div class="export-bar">
+      <button class="export-btn" onclick="exportLogs('json')">JSON</button>
+      <button class="export-btn" onclick="exportLogs('csv')">CSV</button>
+    </div>
+  </div>
 
   <div id="logs-list">
     <div class="empty-state">Loading...</div>
   </div>
 </div>
 
+<script src="utils.js"></script>
 <script>
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  var d = new Date(dateStr);
-  if (isNaN(d)) return dateStr;
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+var allLogs = [];
+
+function exportLogs(format) {
+  if (format === 'json') {
+    LL.exportJSON(allLogs, 'life-long-logs.json');
+  } else {
+    LL.exportCSV(allLogs, [
+      { key: 'date', label: 'Date' },
+      { key: 'body', label: 'Content' }
+    ], 'life-long-logs.csv');
+  }
 }
 
-function getDayOfWeek(dateStr) {
-  if (!dateStr) return '';
-  var d = new Date(dateStr);
-  if (isNaN(d)) return '';
-  return d.toLocaleDateString('en-US', { weekday: 'long' });
+function filterLogs() {
+  var query = document.getElementById('search-input').value.trim();
+  var filtered = allLogs;
+  if (query) {
+    filtered = allLogs.filter(function(l) {
+      return LL.matchesSearch(l, query, ['date', 'body']);
+    });
+  }
+  renderLogs(filtered);
 }
 
-// Simple markdown renderer
-function renderMarkdown(text) {
-  if (!text) return '';
-  var html = text;
-
-  // Escape HTML
-  html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-  // Code blocks (``` ... ```)
-  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(m, lang, code) {
-    return '<pre><code>' + code.trim() + '</code></pre>';
-  });
-
-  // Inline code
-  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-  // Headers
-  html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
-  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-
-  // Bold and italic
-  html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-
-  // Links
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-
-  // Images
-  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
-
-  // Horizontal rule
-  html = html.replace(/^---$/gm, '<hr>');
-
-  // Blockquotes
-  html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
-
-  // Unordered lists
-  html = html.replace(/^[\s]*[-*] (.+)$/gm, '<li>$1</li>');
-  html = html.replace(/(<li>[\s\S]*?<\/li>)/g, function(match) {
-    if (match.indexOf('<ul>') === -1) {
-      return '<ul>' + match + '</ul>';
-    }
-    return match;
-  });
-  // Merge adjacent ul tags
-  html = html.replace(/<\/ul>\s*<ul>/g, '');
-
-  // Ordered lists
-  html = html.replace(/^[\s]*\d+\. (.+)$/gm, '<li>$1</li>');
-
-  // Paragraphs - wrap remaining loose lines
-  var lines = html.split('\n');
-  var result = [];
-  var inBlock = false;
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i].trim();
-    if (line.match(/^<(h[1-6]|ul|ol|li|pre|blockquote|hr|div|table)/)) {
-      inBlock = true;
-      result.push(line);
-    } else if (line.match(/^<\/(ul|ol|pre|blockquote|div|table)/)) {
-      inBlock = false;
-      result.push(line);
-    } else if (line === '') {
-      result.push('');
-    } else if (!inBlock && !line.match(/^<\//)) {
-      result.push('<p>' + line + '</p>');
-    } else {
-      result.push(line);
-    }
+function renderLogs(logs) {
+  var list = document.getElementById('logs-list');
+  if (logs.length === 0) {
+    list.innerHTML = '<div class="empty-state">No logs match your search.</div>';
+    return;
   }
 
-  return result.join('\n');
+  list.innerHTML = logs.map(function(log) {
+    var summary = '';
+    if (log.body) {
+      var firstLine = log.body.split('\n').find(function(l) { return l.trim() !== ''; });
+      if (firstLine) {
+        summary = firstLine.replace(/^#+\s*/, '').substring(0, 100);
+      }
+    }
+    return '<div class="log-entry">' +
+      '<div class="log-header">' +
+        '<div>' +
+          '<div class="log-date">' + LL.formatDateLong(log.date) + '</div>' +
+          (summary ? '<div class="log-day">' + LL.getDayOfWeek(log.date) + '</div>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="log-body">' + LL.renderMarkdown(log.body) + '</div>' +
+    '</div>';
+  }).join('');
 }
 
 async function loadLogs() {
   try {
     var res = await fetch('data/index.json');
     var data = await res.json();
-    var logs = data.logs || [];
+    allLogs = data.logs || [];
 
-    // Sort by date descending
-    logs.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+    allLogs.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
 
-    document.getElementById('log-count').textContent = logs.length + ' log entr' + (logs.length !== 1 ? 'ies' : 'y');
+    document.getElementById('log-count').textContent = allLogs.length + ' log entr' + (allLogs.length !== 1 ? 'ies' : 'y');
 
-    var list = document.getElementById('logs-list');
-    if (logs.length === 0) {
-      list.innerHTML = '<div class="empty-state">No logs yet.</div>';
-      return;
-    }
-
-    list.innerHTML = logs.map(function(log) {
-      var summary = '';
-      if (log.body) {
-        var firstLine = log.body.split('\n').find(function(l) { return l.trim() !== ''; });
-        if (firstLine) {
-          summary = firstLine.replace(/^#+\s*/, '').substring(0, 100);
-        }
-      }
-      return '<div class="log-entry">' +
-        '<div class="log-header">' +
-          '<div>' +
-            '<div class="log-date">' + formatDate(log.date) + '</div>' +
-            (summary ? '<div class="log-day">' + getDayOfWeek(log.date) + '</div>' : '') +
-          '</div>' +
-        '</div>' +
-        '<div class="log-body">' + renderMarkdown(log.body) + '</div>' +
-      '</div>';
-    }).join('');
+    renderLogs(allLogs);
   } catch (err) {
     document.getElementById('logs-list').innerHTML = '<div class="empty-state" style="color:#f85149">Failed to load data. Make sure data/index.json exists.</div>';
     console.error('Failed to load logs:', err);

@@ -4,70 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tasks - Life Long</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; line-height: 1.6; }
-a { color: #58a6ff; text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-/* Navigation */
-nav { background: #161b22; border-bottom: 1px solid #30363d; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 2rem; position: sticky; top: 0; z-index: 100; }
-nav .brand { font-size: 1.2rem; font-weight: 700; color: #f0f6fc; }
-nav .links { display: flex; gap: 1.25rem; flex-wrap: wrap; }
-nav .links a { color: #c9d1d9; font-size: 0.9rem; padding: 0.25rem 0.5rem; border-radius: 6px; transition: background 0.15s; }
-nav .links a:hover, nav .links a.active { background: #21262d; color: #f0f6fc; text-decoration: none; }
-
-/* Layout */
-.container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
-h1 { font-size: 1.75rem; color: #f0f6fc; margin-bottom: 0.5rem; }
-.subtitle { color: #8b949e; margin-bottom: 1.5rem; font-size: 0.95rem; }
-
-/* Badges */
-.badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize; }
-.badge-done, .badge-active { background: #23863620; color: #3fb950; border: 1px solid #23863640; }
-.badge-in-progress { background: #d2992220; color: #d29922; border: 1px solid #d2992240; }
-.badge-todo { background: #8b949e20; color: #8b949e; border: 1px solid #8b949e40; }
-.badge-planning { background: #1f6feb20; color: #58a6ff; border: 1px solid #1f6feb40; }
-.badge-raw { background: #8957e520; color: #bc8cff; border: 1px solid #8957e540; }
-
-/* Tags */
-.tag { display: inline-block; padding: 0.1rem 0.5rem; background: #388bfd20; color: #58a6ff; border-radius: 12px; font-size: 0.7rem; margin: 0.15rem 0.15rem 0.15rem 0; border: 1px solid #388bfd40; }
-
-/* Filters */
-.filters { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
-.filters label { font-size: 0.85rem; color: #8b949e; }
-.filter-btn { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 0.35rem 0.85rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.15s; }
-.filter-btn:hover { border-color: #58a6ff; color: #f0f6fc; }
-.filter-btn.active { background: #1f6feb; border-color: #1f6feb; color: #fff; }
-.filter-select { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
-.filter-select:focus { border-color: #58a6ff; outline: none; }
-.filter-row { display: flex; gap: 0.5rem; align-items: center; }
-
-/* Sort */
-.sort-bar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; align-items: center; flex-wrap: wrap; }
-.sort-btn { background: none; color: #8b949e; border: none; cursor: pointer; font-size: 0.85rem; padding: 0.25rem 0.5rem; border-radius: 4px; transition: all 0.15s; }
-.sort-btn:hover { color: #f0f6fc; }
-.sort-btn.active { color: #58a6ff; font-weight: 600; }
-
-/* Task Cards */
-.task-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; transition: border-color 0.15s; }
-.task-card:hover { border-color: #484f58; }
-.task-title { font-size: 1rem; font-weight: 600; color: #f0f6fc; margin-bottom: 0.5rem; }
-.task-meta { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; font-size: 0.85rem; color: #8b949e; margin-bottom: 0.5rem; }
-.task-body { font-size: 0.85rem; color: #8b949e; margin-top: 0.5rem; white-space: pre-wrap; line-height: 1.6; border-top: 1px solid #21262d; padding-top: 0.75rem; display: none; }
-.task-body.open { display: block; }
-.task-card.clickable { cursor: pointer; }
-.task-tags { margin-top: 0.4rem; }
-
-/* Empty state */
-.empty-state { text-align: center; padding: 3rem; color: #8b949e; }
-
-/* Responsive */
-@media (max-width: 768px) {
-  nav { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
-  .filters { flex-direction: column; align-items: flex-start; }
-}
-</style>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d1117">
 </head>
 <body>
 <nav>
@@ -85,6 +24,14 @@ h1 { font-size: 1.75rem; color: #f0f6fc; margin-bottom: 0.5rem; }
   <h1>Tasks</h1>
   <p class="subtitle" id="task-count">Loading tasks...</p>
 
+  <div class="search-bar">
+    <input type="text" class="search-input" id="search-input" placeholder="Search tasks... (press / to focus)" oninput="applyFilters()">
+    <div class="export-bar">
+      <button class="export-btn" onclick="exportTasks('json')">JSON</button>
+      <button class="export-btn" onclick="exportTasks('csv')">CSV</button>
+    </div>
+  </div>
+
   <div class="filters" id="status-filters"></div>
 
   <div class="filters">
@@ -100,6 +47,16 @@ h1 { font-size: 1.75rem; color: #f0f6fc; margin-bottom: 0.5rem; }
         <option value="all">All Tags</option>
       </select>
     </div>
+    <div class="filter-row">
+      <label>Priority:</label>
+      <select class="filter-select" id="priority-filter" onchange="applyFilters()">
+        <option value="all">All Priorities</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
   </div>
 
   <div class="sort-bar">
@@ -107,6 +64,8 @@ h1 { font-size: 1.75rem; color: #f0f6fc; margin-bottom: 0.5rem; }
     <button class="sort-btn active" data-sort="updated" onclick="setSort('updated')">Updated</button>
     <button class="sort-btn" data-sort="created" onclick="setSort('created')">Created</button>
     <button class="sort-btn" data-sort="title" onclick="setSort('title')">Title</button>
+    <button class="sort-btn" data-sort="priority" onclick="setSort('priority')">Priority</button>
+    <button class="sort-btn" data-sort="due" onclick="setSort('due')">Due Date</button>
   </div>
 
   <div id="tasks-list">
@@ -114,27 +73,31 @@ h1 { font-size: 1.75rem; color: #f0f6fc; margin-bottom: 0.5rem; }
   </div>
 </div>
 
+<script src="utils.js"></script>
 <script>
 var allTasks = [];
 var currentStatusFilter = 'all';
 var currentSort = 'updated';
 var sortAsc = false;
 
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  var d = new Date(dateStr);
-  if (isNaN(d)) return dateStr;
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-}
+var priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
 
-function badgeClass(status) {
-  if (!status) return 'badge-todo';
-  var s = status.toLowerCase().replace(/\s+/g, '-');
-  if (s === 'done' || s === 'active') return 'badge-done';
-  if (s === 'in-progress') return 'badge-in-progress';
-  if (s === 'planning') return 'badge-planning';
-  if (s === 'raw') return 'badge-raw';
-  return 'badge-todo';
+function exportTasks(format) {
+  if (format === 'json') {
+    LL.exportJSON(allTasks, 'life-long-tasks.json');
+  } else {
+    LL.exportCSV(allTasks, [
+      { key: 'id', label: 'ID' },
+      { key: 'title', label: 'Title' },
+      { key: 'project', label: 'Project' },
+      { key: 'status', label: 'Status' },
+      { key: 'priority', label: 'Priority' },
+      { key: 'due', label: 'Due Date' },
+      { key: 'tags', label: 'Tags' },
+      { key: 'created', label: 'Created' },
+      { key: 'updated', label: 'Updated' }
+    ], 'life-long-tasks.csv');
+  }
 }
 
 function setSort(field) {
@@ -154,21 +117,32 @@ function applyFilters() {
   var statusFilter = currentStatusFilter;
   var projectFilter = document.getElementById('project-filter').value;
   var tagFilter = document.getElementById('tag-filter').value;
+  var priorityFilter = document.getElementById('priority-filter').value;
+  var searchQuery = document.getElementById('search-input').value.trim();
 
   var filtered = allTasks.filter(function(t) {
     if (statusFilter !== 'all' && (t.status || '').toLowerCase().replace(/\s+/g, '-') !== statusFilter) return false;
     if (projectFilter !== 'all' && t.project !== projectFilter) return false;
     if (tagFilter !== 'all' && (t.tags || []).indexOf(tagFilter) === -1) return false;
+    if (priorityFilter !== 'all' && (t.priority || '').toLowerCase() !== priorityFilter) return false;
+    if (searchQuery && !LL.matchesSearch(t, searchQuery, ['title', 'id', 'project', 'tags', 'body', 'status'])) return false;
     return true;
   });
 
-  // Sort
   filtered.sort(function(a, b) {
     var valA, valB;
     if (currentSort === 'title') {
       valA = (a.title || '').toLowerCase();
       valB = (b.title || '').toLowerCase();
       return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    } else if (currentSort === 'priority') {
+      valA = priorityOrder[((a.priority || 'low')).toLowerCase()] || 3;
+      valB = priorityOrder[((b.priority || 'low')).toLowerCase()] || 3;
+      return sortAsc ? valB - valA : valA - valB;
+    } else if (currentSort === 'due') {
+      valA = a.due ? new Date(a.due) : new Date('9999-12-31');
+      valB = b.due ? new Date(b.due) : new Date('9999-12-31');
+      return sortAsc ? valB - valA : valA - valB;
     } else {
       valA = new Date(a[currentSort] || a.created || 0);
       valB = new Date(b[currentSort] || b.created || 0);
@@ -202,12 +176,20 @@ function renderTasks(tasks) {
   list.innerHTML = tasks.map(function(t) {
     var tags = (t.tags || []).map(function(tag) { return '<span class="tag">' + tag + '</span>'; }).join('');
     var hasBody = t.body && t.body.trim();
-    return '<div class="task-card' + (hasBody ? ' clickable' : '') + '"' + (hasBody ? ' onclick="toggleTaskBody(this)"' : '') + '>' +
+    var dueClass = t.due ? LL.dueDateClass(t.due) : '';
+    var cardClass = 'task-card';
+    if (hasBody) cardClass += ' clickable';
+    if (t.status !== 'done' && dueClass === 'overdue') cardClass += ' overdue';
+    else if (t.status !== 'done' && dueClass === 'due-soon') cardClass += ' due-soon';
+
+    return '<div class="' + cardClass + '"' + (hasBody ? ' onclick="toggleTaskBody(this)"' : '') + '>' +
       '<div class="task-title">' + (t.title || t.id) + '</div>' +
       '<div class="task-meta">' +
-        '<span class="badge ' + badgeClass(t.status) + '">' + (t.status || 'todo') + '</span>' +
+        '<span class="badge ' + LL.badgeClass(t.status) + '">' + (t.status || 'todo') + '</span>' +
+        (t.priority ? '<span class="badge ' + LL.priorityBadgeClass(t.priority) + '">' + t.priority + '</span>' : '') +
         (t.project ? '<span>Project: <a href="projects.html" onclick="event.stopPropagation()">' + t.project + '</a></span>' : '') +
-        '<span>Updated ' + formatDate(t.updated || t.created) + '</span>' +
+        (t.due && t.status !== 'done' ? '<span class="task-due ' + dueClass + '">' + LL.relativeDate(t.due) + '</span>' : '') +
+        '<span>Updated ' + LL.formatDate(t.updated || t.created) + '</span>' +
       '</div>' +
       (tags ? '<div class="task-tags">' + tags + '</div>' : '') +
       (hasBody ? '<div class="task-body">' + t.body + '</div>' : '') +

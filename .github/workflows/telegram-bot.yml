@@ -1,0 +1,46 @@
+name: Telegram Bot Handler
+
+# This workflow can be triggered manually or via webhook.
+# To use with Telegram, set up a webhook that dispatches this workflow.
+# Or use the polling approach below (runs every 5 minutes).
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Telegram message text'
+        required: true
+        type: string
+
+  # Optional: Poll for new Telegram messages every 5 minutes
+  # Uncomment to enable polling mode
+  # schedule:
+  #   - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  process-message:
+    runs-on: ubuntu-latest
+    # Only run if secrets are configured
+    if: ${{ github.event.inputs.message != '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/design-github-system-RCORX
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Process Telegram message
+        env:
+          TELEGRAM_MESSAGE: ${{ github.event.inputs.message }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GH_PAT: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python scripts/telegram_webhook.py

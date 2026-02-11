@@ -9,12 +9,15 @@ Supports these commands in the issue title:
   - "Add Idea: <idea text>"
   - "Update Task: <task-id> status <new-status>"
 
-This is a simple template-based parser. Replace with AI parsing later
-(e.g., via OpenRouter API call) for natural language support.
+Also supports optional AI-powered natural language parsing via OpenRouter API.
+Set OPENROUTER_API_KEY secret to enable. Falls back to template parsing if unavailable.
 """
 
+import json
 import os
 import re
+import urllib.request
+import urllib.error
 from datetime import date
 from pathlib import Path
 
@@ -23,6 +26,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 title = os.environ.get("ISSUE_TITLE", "").strip()
 body = os.environ.get("ISSUE_BODY", "").strip()
 issue_number = os.environ.get("ISSUE_NUMBER", "0")
+openrouter_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
 
 today = date.today().isoformat()
 
@@ -99,6 +103,63 @@ def parse_body_fields(body_text: str) -> dict:
     return fields
 
 
+def try_ai_parse(issue_title: str, issue_body: str) -> dict | None:
+    """Attempt to parse the issue using AI via OpenRouter API.
+
+    Returns a dict with parsed intent and fields, or None if AI is unavailable.
+    This is non-blocking - failures silently fall back to template parsing.
+    """
+    if not openrouter_key:
+        return None
+
+    prompt = f"""Parse this GitHub issue into a structured command for a productivity system.
+
+Issue Title: {issue_title}
+Issue Body: {issue_body}
+
+Return ONLY a JSON object with these fields:
+- "action": one of "create_project", "create_task", "add_log", "add_idea", "update_task"
+- "name" or "title": the name/title of the item
+- "project": project ID if applicable
+- "tags": comma-separated tags if mentioned
+- "description": description if provided
+- "priority": one of "low", "medium", "high", "critical" if mentioned
+- "due": due date in YYYY-MM-DD format if mentioned
+- "task_id": task ID if updating
+- "new_status": new status if updating (todo, in-progress, done)
+
+If you cannot determine the action, return {{"action": "unknown"}}."""
+
+    try:
+        req_data = json.dumps({
+            "model": "openai/gpt-3.5-turbo",
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 500,
+            "temperature": 0,
+        }).encode()
+
+        req = urllib.request.Request(
+            "https://openrouter.ai/api/v1/chat/completions",
+            data=req_data,
+            headers={
+                "Authorization": f"Bearer {openrouter_key}",
+                "Content-Type": "application/json",
+            },
+        )
+
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode())
+            content = result["choices"][0]["message"]["content"]
+            # Extract JSON from response
+            json_match = re.search(r"\{[^{}]*\}", content, re.DOTALL)
+            if json_match:
+                return json.loads(json_match.group())
+    except (urllib.error.URLError, json.JSONDecodeError, KeyError, IndexError) as e:
+        print(f"AI parsing failed (non-blocking): {e}")
+
+    return None
+
+
 def create_project(name: str):
     fields = parse_body_fields(body)
     # Issue form may provide the name in the body instead of the title
@@ -128,7 +189,7 @@ tags: {tag_str}
     print(f"Created project: {filepath}")
 
 
-def create_task(task_title: str):
+def create_task(task_title: str, ai_fields: dict | None = None):
     fields = parse_body_fields(body)
     # Issue form may provide the title in the body
     task_title = task_title or fields.get("task title", "untitled")
@@ -138,17 +199,41 @@ def create_task(task_title: str):
     tag_str = f"[{', '.join(tag_list)}]" if tag_list else "[]"
     description = fields.get("description", task_title)
 
+    # Priority and due date support
+    priority = fields.get("priority", "")
+    due = fields.get("due date", fields.get("due", ""))
+
+    # AI can override/fill in missing fields
+    if ai_fields:
+        if not priority and ai_fields.get("priority"):
+            priority = ai_fields["priority"]
+        if not due and ai_fields.get("due"):
+            due = ai_fields["due"]
+        if project == "unassigned" and ai_fields.get("project"):
+            project = ai_fields["project"]
+
     task_id = next_task_id()
     filepath = REPO_ROOT / "tasks" / f"{task_id}.md"
 
+    # Build frontmatter
+    fm_lines = [
+        f"id: {task_id}",
+        f"project: {project}",
+        f"title: {task_title}",
+        "status: todo",
+        f"created: {today}",
+        f"updated: {today}",
+        f"tags: {tag_str}",
+    ]
+    if priority:
+        fm_lines.append(f"priority: {priority}")
+    if due:
+        fm_lines.append(f"due: {due}")
+
+    frontmatter = "\n".join(fm_lines)
+
     content = f"""---
-id: {task_id}
-project: {project}
-title: {task_title}
-status: todo
-created: {today}
-updated: {today}
-tags: {tag_str}
+{frontmatter}
 ---
 
 ## Description
@@ -233,6 +318,12 @@ def update_task(task_id: str, new_status: str):
 
 
 # --- Intent matching ---
+
+# Try AI parsing first (non-blocking)
+ai_result = try_ai_parse(title, body)
+if ai_result and ai_result.get("action") != "unknown":
+    print(f"AI parsed intent: {ai_result['action']}")
+
 title_lower = title.lower()
 
 if title_lower.startswith("create project:"):
@@ -241,7 +332,7 @@ if title_lower.startswith("create project:"):
 
 elif title_lower.startswith("create task:"):
     task_title = title.split(":", 1)[1].strip()
-    create_task(task_title)
+    create_task(task_title, ai_fields=ai_result)
 
 elif title_lower.startswith("add log:"):
     summary = title.split(":", 1)[1].strip()
@@ -270,6 +361,32 @@ elif title_lower.startswith("update task:"):
         else:
             print(f"Could not parse update command: {rest}")
 
+elif ai_result and ai_result.get("action") != "unknown":
+    # AI understood the intent even without a standard prefix
+    action = ai_result["action"]
+    print(f"Using AI-parsed action: {action}")
+    if action == "create_project":
+        create_project(ai_result.get("name", ""))
+    elif action == "create_task":
+        create_task(ai_result.get("title", ""), ai_fields=ai_result)
+    elif action == "add_log":
+        add_log(ai_result.get("title", title))
+    elif action == "add_idea":
+        add_idea(ai_result.get("title", body or title))
+    elif action == "update_task":
+        tid = ai_result.get("task_id", "")
+        ns = ai_result.get("new_status", "")
+        if tid and ns:
+            update_task(tid, ns)
+        else:
+            print(f"AI parsed update_task but missing task_id or new_status")
+    else:
+        print(f"AI returned unknown action: {action}")
+
 else:
     print(f"Unknown command in issue title: {title}")
     print("Supported prefixes: Create Project:, Create Task:, Add Log:, Add Idea:, Update Task:")
+    if openrouter_key:
+        print("AI parsing was attempted but could not determine intent.")
+    else:
+        print("Tip: Set OPENROUTER_API_KEY secret to enable AI-powered natural language parsing.")
