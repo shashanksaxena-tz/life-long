@@ -132,7 +132,7 @@ h1 { font-size: 1.75rem; color: #f0f6fc; margin-bottom: 0.5rem; }
       <a href="tasks.html" class="quick-link"><div class="ql-icon">&#9745;</div><div class="ql-label">View Tasks</div></a>
       <a href="logs.html" class="quick-link"><div class="ql-icon">&#128221;</div><div class="ql-label">Daily Logs</div></a>
       <a href="ideas.html" class="quick-link"><div class="ql-icon">&#128161;</div><div class="ql-label">Ideas Board</div></a>
-      <a href="https://github.com/shashanksaxena-tz/life-long/issues/new/choose" class="quick-link" target="_blank"><div class="ql-icon">&#10133;</div><div class="ql-label">New Issue</div></a>
+      <a href="#" class="quick-link" onclick="event.preventDefault();if(window.llShowAddModal)window.llShowAddModal()"><div class="ql-icon">&#10133;</div><div class="ql-label">Add New</div></a>
     </div>
   </div>
 </div>
@@ -265,5 +265,6 @@ async function loadDashboard() {
 
 loadDashboard();
 </script>
+<script src="app.js"></script>
 </body>
 </html>

@@ -7,7 +7,6 @@ on:
 permissions:
   contents: write
   issues: write
-  pull-requests: write
 
 jobs:
   process:
@@ -31,26 +30,18 @@ jobs:
       - name: Run aggregation
         run: python scripts/aggregate.py
 
-      - name: Create PR
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit and push to main
         run: |
-          BRANCH="input/issue-${{ github.event.issue.number }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$BRANCH"
           git add -A
           git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "feat: process issue #${{ github.event.issue.number }}"
-          git push -u origin "$BRANCH"
-          gh pr create \
-            --title "Input from issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}" \
-            --body "Auto-generated from issue #${{ github.event.issue.number }}. Review and merge to apply changes." \
-            --base main
+          git commit -m "feat: process issue #${{ github.event.issue.number }} - ${{ github.event.issue.title }}"
+          git push
 
       - name: Close issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh issue close ${{ github.event.issue.number }} \
-            --comment "Processed! PR created. Review and merge to apply."
+            --comment "Processed and deployed! Changes will appear on the site in ~1 minute."
