@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-02-11T12:15:52.313822",
+  "generated_at": "2026-02-11T13:00:41.338590",
   "stats": {
-    "total_projects": 2,
-    "active_projects": 1,
+    "total_projects": 3,
+    "active_projects": 2,
     "total_tasks": 3,
     "done_tasks": 1,
     "in_progress_tasks": 1,
@@ -11,6 +11,8 @@
     "total_logs": 1,
     "logs_this_week": 1,
     "all_tags": [
+      "Architecture",
+      "Payments etc",
       "backend",
       "bug",
       "data",
@@ -43,6 +45,17 @@
         "security"
       ],
       "body": "## Description\nHandles authentication and authorization.\n\n## Stats\n- Total tasks: 4\n- Completed: 2"
+    },
+    {
+      "id": "civi",
+      "name": "Civi",
+      "status": "active",
+      "created": "2026-02-11",
+      "tags": [
+        "Architecture",
+        "Payments etc"
+      ],
+      "body": "## Description\nMunciplaity Tax system\n\n## Stats\n- Total tasks: 0\n- Completed: 0"
     }
   ],
   "tasks": [
