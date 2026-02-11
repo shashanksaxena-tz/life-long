@@ -1,0 +1,23 @@
+name: Create Project
+description: Create a new project
+title: "Create Project: "
+labels: ["input"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Project Name
+      placeholder: e.g. Analytics Engine
+    validations:
+      required: true
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: Comma-separated tags
+      placeholder: e.g. frontend, data
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: What is this project about?

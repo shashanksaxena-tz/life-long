@@ -1,0 +1,12 @@
+name: Add Log Entry
+description: Add a daily log entry
+title: "Add Log: "
+labels: ["input"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: e.g. Worked on auth fixes and dashboard UI
+    validations:
+      required: true

@@ -1,0 +1,22 @@
+name: Update Task
+description: Update the status of an existing task
+title: "Update Task: "
+labels: ["input"]
+body:
+  - type: input
+    id: task-id
+    attributes:
+      label: Task ID
+      placeholder: e.g. task-2026-001
+    validations:
+      required: true
+  - type: dropdown
+    id: status
+    attributes:
+      label: New Status
+      options:
+        - todo
+        - in-progress
+        - done
+    validations:
+      required: true

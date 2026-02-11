@@ -1,0 +1,18 @@
+name: Add Idea
+description: Capture a new idea
+title: "Add Idea: "
+labels: ["input"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      placeholder: Describe your idea...
+    validations:
+      required: true
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: Comma-separated tags
+      placeholder: e.g. product, automation

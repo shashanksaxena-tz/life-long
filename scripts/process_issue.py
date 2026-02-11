@@ -56,20 +56,55 @@ def next_idea_id() -> str:
 
 
 def parse_body_fields(body_text: str) -> dict:
-    """Extract key: value pairs from issue body."""
+    """Extract fields from issue body.
+
+    Supports two formats:
+    1. Plain key: value lines
+    2. GitHub issue form format: ### Label\\n\\nValue
+    """
     fields = {}
-    for line in body_text.splitlines():
-        line = line.strip()
-        if ":" in line:
-            key, _, value = line.partition(":")
-            fields[key.strip().lower()] = value.strip()
+    lines = body_text.splitlines()
+
+    # Try GitHub issue form format first (### Label\n\nValue)
+    i = 0
+    found_form_fields = False
+    while i < len(lines):
+        line = lines[i].strip()
+        if line.startswith("### "):
+            key = line[4:].strip().lower()
+            # Collect value lines until next ### or end
+            i += 1
+            # Skip blank lines after header
+            while i < len(lines) and lines[i].strip() == "":
+                i += 1
+            value_lines = []
+            while i < len(lines) and not lines[i].strip().startswith("### "):
+                value_lines.append(lines[i])
+                i += 1
+            value = "\n".join(value_lines).strip()
+            if value and value != "_No response_":
+                fields[key] = value
+                found_form_fields = True
+        else:
+            i += 1
+
+    # Fall back to plain key: value format
+    if not found_form_fields:
+        for line in lines:
+            line = line.strip()
+            if ":" in line and not line.startswith("#"):
+                key, _, value = line.partition(":")
+                fields[key.strip().lower()] = value.strip()
+
     return fields
 
 
 def create_project(name: str):
+    fields = parse_body_fields(body)
+    # Issue form may provide the name in the body instead of the title
+    name = name or fields.get("project name", "untitled")
     slug = slugify(name)
     filepath = REPO_ROOT / "projects" / f"{slug}.md"
-    fields = parse_body_fields(body)
     tags = fields.get("tags", "")
     tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
     tag_str = f"[{', '.join(tag_list)}]" if tag_list else "[]"
@@ -95,6 +130,8 @@ tags: {tag_str}
 
 def create_task(task_title: str):
     fields = parse_body_fields(body)
+    # Issue form may provide the title in the body
+    task_title = task_title or fields.get("task title", "untitled")
     project = fields.get("project", "unassigned")
     tags = fields.get("tags", "")
     tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
@@ -212,18 +249,26 @@ elif title_lower.startswith("add log:"):
 
 elif title_lower.startswith("add idea:"):
     idea_text = title.split(":", 1)[1].strip()
-    if body:
-        idea_text = body  # Use full body if provided
+    fields = parse_body_fields(body)
+    # Prefer the "idea" field from issue form, then full body, then title
+    idea_text = fields.get("idea", idea_text or body)
     add_idea(idea_text)
 
 elif title_lower.startswith("update task:"):
-    # Expected: "Update Task: task-2026-001 status done"
     rest = title.split(":", 1)[1].strip()
+    # Try inline format: "Update Task: task-2026-001 status done"
     match = re.match(r"(task-\S+)\s+status\s+(\S+)", rest, re.IGNORECASE)
     if match:
         update_task(match.group(1), match.group(2))
     else:
-        print(f"Could not parse update command: {rest}")
+        # Try issue form fields from body
+        fields = parse_body_fields(body)
+        task_id = fields.get("task id", rest.strip()) if rest.strip() else fields.get("task id", "")
+        new_status = fields.get("new status", "")
+        if task_id and new_status:
+            update_task(task_id, new_status)
+        else:
+            print(f"Could not parse update command: {rest}")
 
 else:
     print(f"Unknown command in issue title: {title}")

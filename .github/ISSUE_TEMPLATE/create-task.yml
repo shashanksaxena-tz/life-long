@@ -1,0 +1,31 @@
+name: Create Task
+description: Create a new task in a project
+title: "Create Task: "
+labels: ["input"]
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Task Title
+      placeholder: e.g. Fix OAuth redirect bug
+    validations:
+      required: true
+  - type: input
+    id: project
+    attributes:
+      label: Project
+      description: Project ID (slug) this task belongs to
+      placeholder: e.g. auth-service
+    validations:
+      required: true
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: Comma-separated tags
+      placeholder: e.g. bug, backend
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: What needs to be done?
