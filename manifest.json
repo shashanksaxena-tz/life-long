@@ -3,14 +3,35 @@
   "short_name": "Life Long",
   "description": "Personal productivity system built on GitHub infrastructure",
   "start_url": "/life-long/",
+  "scope": "/life-long/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#0d1117",
   "theme_color": "#0d1117",
+  "categories": ["productivity", "utilities"],
   "icons": [
     {
       "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/life-long/index.html",
+      "description": "View your productivity dashboard"
+    },
+    {
+      "name": "Tasks",
+      "url": "/life-long/tasks.html",
+      "description": "View and manage tasks"
+    },
+    {
+      "name": "Ideas",
+      "url": "/life-long/ideas.html",
+      "description": "Browse your ideas"
     }
   ]
 }

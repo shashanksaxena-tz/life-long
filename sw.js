@@ -1,4 +1,4 @@
-var CACHE_NAME = 'life-long-v1';
+var CACHE_NAME = 'life-long-v2';
 var URLS_TO_CACHE = [
   './',
   'index.html',
@@ -6,13 +6,17 @@ var URLS_TO_CACHE = [
   'tasks.html',
   'logs.html',
   'ideas.html',
+  'goals.html',
+  'habits.html',
   'style.css',
   'utils.js',
   'app.js',
+  'manifest.json',
   'data/index.json'
 ];
 
 self.addEventListener('install', function(event) {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
       return cache.addAll(URLS_TO_CACHE);
@@ -23,7 +27,6 @@ self.addEventListener('install', function(event) {
 self.addEventListener('fetch', function(event) {
   event.respondWith(
     fetch(event.request).then(function(response) {
-      // Update cache with fresh response
       if (response.ok) {
         var responseClone = response.clone();
         caches.open(CACHE_NAME).then(function(cache) {
@@ -32,7 +35,6 @@ self.addEventListener('fetch', function(event) {
       }
       return response;
     }).catch(function() {
-      // Serve from cache if offline
       return caches.match(event.request);
     })
   );
@@ -45,6 +47,8 @@ self.addEventListener('activate', function(event) {
         names.filter(function(name) { return name !== CACHE_NAME; })
           .map(function(name) { return caches.delete(name); })
       );
+    }).then(function() {
+      return self.clients.claim();
     })
   );
 });

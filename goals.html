@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goals - Life Long</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d1117">
+</head>
+<body>
+<nav>
+  <div class="brand">Life Long</div>
+  <div class="links">
+    <a href="index.html">Dashboard</a>
+    <a href="projects.html">Projects</a>
+    <a href="tasks.html">Tasks</a>
+    <a href="logs.html">Logs</a>
+    <a href="ideas.html">Ideas</a>
+    <a href="goals.html" class="active">Goals</a>
+    <a href="habits.html">Habits</a>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>Goals &amp; Milestones</h1>
+  <p class="subtitle" id="goal-count">Loading goals...</p>
+
+  <div class="search-bar">
+    <input type="text" class="search-input" id="search-input" placeholder="Search goals... (press / to focus)" oninput="applyFilters()">
+    <div class="export-bar">
+      <button class="export-btn" onclick="exportGoals('json')">JSON</button>
+      <button class="export-btn" onclick="exportGoals('csv')">CSV</button>
+    </div>
+  </div>
+
+  <div class="filters" id="status-filters"></div>
+
+  <div id="goals-list">
+    <div class="empty-state">Loading...</div>
+  </div>
+</div>
+
+<script src="utils.js"></script>
+<script>
+var allGoals = [];
+var allTasks = [];
+var currentStatusFilter = 'all';
+
+function exportGoals(format) {
+  if (format === 'json') {
+    LL.exportJSON(allGoals, 'life-long-goals.json');
+  } else {
+    LL.exportCSV(allGoals, [
+      { key: 'id', label: 'ID' },
+      { key: 'title', label: 'Title' },
+      { key: 'status', label: 'Status' },
+      { key: 'target_date', label: 'Target Date' },
+      { key: 'tags', label: 'Tags' },
+      { key: 'linked_tasks', label: 'Linked Tasks' },
+      { key: 'created', label: 'Created' }
+    ], 'life-long-goals.csv');
+  }
+}
+
+function setStatusFilter(filter) {
+  currentStatusFilter = filter;
+  document.querySelectorAll('#status-filters .filter-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  applyFilters();
+}
+
+function applyFilters() {
+  var statusFilter = currentStatusFilter;
+  var searchQuery = document.getElementById('search-input').value.trim();
+
+  var filtered = allGoals.filter(function(goal) {
+    if (statusFilter !== 'all' && (goal.status || '').toLowerCase() !== statusFilter) return false;
+    if (searchQuery && !LL.matchesSearch(goal, searchQuery, ['title', 'id', 'tags', 'body', 'status'])) return false;
+    return true;
+  });
+
+  renderGoals(filtered);
+}
+
+function getGoalTaskCounts(goal) {
+  var linkedIds = goal.linked_tasks || [];
+  if (linkedIds.length === 0) return { total: 0, done: 0 };
+  var total = 0;
+  var done = 0;
+  linkedIds.forEach(function(taskId) {
+    var task = allTasks.find(function(t) { return t.id === taskId; });
+    if (task) {
+      total++;
+      if (task.status === 'done') done++;
+    }
+  });
+  return { total: total, done: done };
+}
+
+function toggleGoalBody(el) {
+  var body = el.querySelector('.goal-body');
+  if (body) body.classList.toggle('open');
+}
+
+function renderGoals(goals) {
+  var list = document.getElementById('goals-list');
+  if (goals.length === 0) {
+    list.innerHTML = '<div class="empty-state">No goals match the current filters.</div>';
+    return;
+  }
+
+  list.innerHTML = goals.map(function(goal) {
+    var tags = (goal.tags || []).map(function(t) { return '<span class="tag">' + t + '</span>'; }).join('');
+    var counts = getGoalTaskCounts(goal);
+    var progressHtml = LL.progressBarHTML(counts.done, counts.total);
+    var taskInfo = counts.total > 0 ? counts.done + '/' + counts.total + ' tasks done' : '';
+    var hasBody = goal.body && goal.body.trim();
+    var cardClass = 'goal-card';
+    if (hasBody) cardClass += ' clickable';
+
+    var targetDateHtml = '';
+    if (goal.target_date) {
+      var dueClass = goal.status !== 'completed' ? LL.dueDateClass(goal.target_date) : '';
+      var relDate = goal.status !== 'completed' ? LL.relativeDate(goal.target_date) : LL.formatDate(goal.target_date);
+      targetDateHtml = '<span class="task-due ' + dueClass + '">Target: ' + relDate + '</span>';
+    }
+
+    return '<div class="' + cardClass + '"' + (hasBody ? ' onclick="toggleGoalBody(this)"' : '') + '>' +
+      '<div class="goal-title">' + (goal.title || goal.id) + '</div>' +
+      '<div class="goal-meta">' +
+        '<span class="badge ' + LL.badgeClass(goal.status) + '">' + (goal.status || 'active') + '</span>' +
+        targetDateHtml +
+        (taskInfo ? '<span class="goal-task-count">' + taskInfo + '</span>' : '') +
+        '<span>Created ' + LL.formatDate(goal.created) + '</span>' +
+      '</div>' +
+      (tags ? '<div class="goal-tags">' + tags + '</div>' : '') +
+      progressHtml +
+      (hasBody ? '<div class="goal-body">' + LL.renderMarkdown(goal.body) + '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+async function loadGoals() {
+  try {
+    var res = await fetch('data/index.json');
+    var data = await res.json();
+    allGoals = data.goals || [];
+    allTasks = data.tasks || [];
+
+    allGoals.sort(function(a, b) { return new Date(b.created) - new Date(a.created); });
+
+    document.getElementById('goal-count').textContent = allGoals.length + ' goal' + (allGoals.length !== 1 ? 's' : '');
+
+    var statuses = {};
+    allGoals.forEach(function(goal) {
+      var s = (goal.status || 'active').toLowerCase();
+      statuses[s] = (statuses[s] || 0) + 1;
+    });
+    var filtersHtml = '<button class="filter-btn active" data-filter="all" onclick="setStatusFilter(\'all\')">All (' + allGoals.length + ')</button>';
+    Object.keys(statuses).forEach(function(s) {
+      filtersHtml += '<button class="filter-btn" data-filter="' + s + '" onclick="setStatusFilter(\'' + s + '\')">' + s.charAt(0).toUpperCase() + s.slice(1) + ' (' + statuses[s] + ')</button>';
+    });
+    document.getElementById('status-filters').innerHTML = filtersHtml;
+
+    applyFilters();
+  } catch (err) {
+    document.getElementById('goals-list').innerHTML = '<div class="empty-state" style="color:var(--accent-red)">Failed to load data. Make sure data/index.json exists.</div>';
+    console.error('Failed to load goals:', err);
+  }
+}
+
+loadGoals();
+</script>
+<script src="app.js"></script>
+</body>
+</html>

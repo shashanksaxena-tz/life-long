@@ -19,44 +19,90 @@
     <a href="tasks.html">Tasks</a>
     <a href="logs.html">Logs</a>
     <a href="ideas.html">Ideas</a>
+    <a href="goals.html">Goals</a>
+    <a href="habits.html">Habits</a>
   </div>
 </nav>
 
 <div class="container">
+
+  <!-- 1. Header -->
   <h1>Dashboard</h1>
   <p class="subtitle" id="generated-at">Loading...</p>
 
+  <!-- 2. Stats Grid -->
   <div class="stats-grid" id="stats-grid">
-    <div class="stat-card"><div class="stat-label">Projects</div><div class="stat-value" id="stat-projects">-</div><div class="stat-detail" id="stat-projects-detail"></div></div>
-    <div class="stat-card"><div class="stat-label">Tasks</div><div class="stat-value" id="stat-tasks">-</div><div class="stat-detail" id="stat-tasks-detail"></div></div>
-    <div class="stat-card"><div class="stat-label">Ideas</div><div class="stat-value" id="stat-ideas">-</div></div>
-    <div class="stat-card"><div class="stat-label">Logs</div><div class="stat-value" id="stat-logs">-</div><div class="stat-detail" id="stat-logs-detail"></div></div>
+    <div class="stat-card">
+      <div class="stat-label">Projects</div>
+      <div class="stat-value" id="stat-projects">-</div>
+      <div class="stat-detail" id="stat-projects-detail"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Tasks</div>
+      <div class="stat-value" id="stat-tasks">-</div>
+      <div class="stat-detail" id="stat-tasks-detail"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Ideas</div>
+      <div class="stat-value" id="stat-ideas">-</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Logs</div>
+      <div class="stat-value" id="stat-logs">-</div>
+      <div class="stat-detail" id="stat-logs-detail"></div>
+    </div>
   </div>
 
-  <!-- Streak & Productivity Row -->
+  <!-- 3. Streak & Productivity Row -->
   <div class="charts-grid" style="margin-bottom:1.5rem">
     <div class="streak-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem">
         <div>
-          <div class="stat-label" style="font-size:0.8rem;color:#8b949e;text-transform:uppercase;letter-spacing:0.5px">LOGGING STREAK</div>
+          <div class="stat-label" style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">LOGGING STREAK</div>
           <div class="streak-value" id="streak-value">-</div>
           <div class="streak-label" id="streak-label">days</div>
         </div>
         <div style="text-align:right">
-          <div class="stat-label" style="font-size:0.8rem;color:#8b949e;text-transform:uppercase;letter-spacing:0.5px">LONGEST</div>
-          <div style="font-size:1.5rem;font-weight:700;color:#f0f6fc" id="streak-longest">-</div>
+          <div class="stat-label" style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">LONGEST</div>
+          <div style="font-size:1.5rem;font-weight:700;color:var(--text-primary)" id="streak-longest">-</div>
           <div class="streak-label">days</div>
         </div>
       </div>
       <div class="streak-bar" id="streak-bar"></div>
     </div>
     <div class="streak-card">
-      <div class="stat-label" style="font-size:0.8rem;color:#8b949e;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem">WEEKLY PRODUCTIVITY</div>
+      <div class="stat-label" style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.5rem">WEEKLY PRODUCTIVITY</div>
       <div class="productivity-score" id="prod-score">-</div>
-      <div id="prod-details" style="margin-top:0.75rem;font-size:0.85rem;color:#8b949e"></div>
+      <div id="prod-details" style="margin-top:0.75rem;font-size:0.85rem;color:var(--text-muted)"></div>
     </div>
   </div>
 
+  <!-- 4. Activity Heatmap -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Activity Heatmap</h2>
+      <span id="heatmap-total" style="font-size:0.85rem;color:var(--text-muted)"></span>
+    </div>
+    <div class="card">
+      <div class="heatmap-container">
+        <div class="heatmap-months" id="heatmap-months"></div>
+        <div class="heatmap-grid" id="heatmap-grid">
+          <div class="loading">Loading heatmap...</div>
+        </div>
+        <div class="heatmap-legend" id="heatmap-legend">
+          <span>Less</span>
+          <div class="heatmap-cell"></div>
+          <div class="heatmap-cell l1"></div>
+          <div class="heatmap-cell l2"></div>
+          <div class="heatmap-cell l3"></div>
+          <div class="heatmap-cell l4"></div>
+          <span>More</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Task Status Doughnut + Projects Bar Chart Row -->
   <div class="charts-grid">
     <div class="chart-container">
       <h3>Task Status</h3>
@@ -68,14 +114,51 @@
     </div>
   </div>
 
-  <!-- Overdue / Due Soon Tasks -->
+  <!-- 6. Burndown Chart -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Burndown Chart</h2>
+      <span style="font-size:0.85rem;color:var(--text-muted)">Last 30 days</span>
+    </div>
+    <div class="burndown-container">
+      <canvas id="burndownChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- 7. Task Completion Sparkline -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Task Completion Trend</h2>
+      <span style="font-size:0.85rem;color:var(--text-muted)">Last 7 weeks</span>
+    </div>
+    <div class="card" id="sparkline-card">
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+        <div id="sparkline-container" style="flex:1;min-width:120px"></div>
+        <div id="sparkline-details" style="font-size:0.85rem;color:var(--text-muted)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Overdue / Due Soon Tasks -->
   <div class="section" id="due-section" style="display:none">
     <div class="section-header">
-      <h2>Upcoming & Overdue</h2>
+      <h2>Upcoming &amp; Overdue</h2>
     </div>
     <div id="due-tasks"></div>
   </div>
 
+  <!-- 9. Timeline View -->
+  <div class="section" id="timeline-section">
+    <div class="section-header">
+      <h2>Timeline</h2>
+      <span style="font-size:0.85rem;color:var(--text-muted)">All activity</span>
+    </div>
+    <div class="timeline" id="timeline-view">
+      <div class="loading">Loading timeline...</div>
+    </div>
+  </div>
+
+  <!-- 10. Recent Activity + Exports -->
   <div class="section">
     <div class="section-header">
       <h2>Recent Activity</h2>
@@ -89,6 +172,7 @@
     </div>
   </div>
 
+  <!-- 11. Quick Links -->
   <div class="section">
     <div class="section-header">
       <h2>Quick Links</h2>
@@ -98,9 +182,12 @@
       <a href="tasks.html" class="quick-link"><div class="ql-icon">&#9745;</div><div class="ql-label">View Tasks</div></a>
       <a href="logs.html" class="quick-link"><div class="ql-icon">&#128221;</div><div class="ql-label">Daily Logs</div></a>
       <a href="ideas.html" class="quick-link"><div class="ql-icon">&#128161;</div><div class="ql-label">Ideas Board</div></a>
+      <a href="goals.html" class="quick-link"><div class="ql-icon">&#127919;</div><div class="ql-label">Goals</div></a>
+      <a href="habits.html" class="quick-link"><div class="ql-icon">&#128200;</div><div class="ql-label">Habits</div></a>
       <a href="#" class="quick-link" onclick="event.preventDefault();if(window.llShowAddModal)window.llShowAddModal()"><div class="ql-icon">&#10133;</div><div class="ql-label">Add New</div></a>
     </div>
   </div>
+
 </div>
 
 <script src="utils.js"></script>
@@ -127,6 +214,278 @@ function exportDashboard(format) {
   }
 }
 
+function getThemeColor(varName) {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+}
+
+function renderHeatmap(data) {
+  var cells = LL.buildActivityHeatmap(data.logs, data.tasks);
+  var grid = document.getElementById('heatmap-grid');
+  var totalActivity = 0;
+
+  var html = '';
+  for (var i = 0; i < cells.length; i++) {
+    var cell = cells[i];
+    totalActivity += cell.count;
+    var cls = 'heatmap-cell';
+    if (cell.level) cls += ' ' + cell.level;
+    if (cell.isToday) cls += ' today';
+    html += '<div class="' + cls + '" title="' + cell.date + ': ' + cell.count + ' activities"></div>';
+  }
+  grid.innerHTML = html;
+
+  var totalEl = document.getElementById('heatmap-total');
+  totalEl.textContent = totalActivity + ' contributions in the last year';
+
+  // Render month labels
+  var monthsEl = document.getElementById('heatmap-months');
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var startDate = new Date(today);
+  startDate.setDate(startDate.getDate() - 364);
+  var dayOfWeek = startDate.getDay();
+  startDate.setDate(startDate.getDate() - dayOfWeek);
+
+  var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var months = [];
+  var lastMonth = -1;
+  var weekCount = Math.ceil(cells.length / 7);
+
+  for (var w = 0; w < weekCount; w++) {
+    var cellIdx = w * 7;
+    if (cellIdx < cells.length) {
+      var d = new Date(cells[cellIdx].date);
+      var m = d.getMonth();
+      if (m !== lastMonth) {
+        months.push({ month: monthNames[m], week: w });
+        lastMonth = m;
+      }
+    }
+  }
+
+  var monthHtml = '';
+  for (var mi = 0; mi < months.length; mi++) {
+    var leftOffset = months[mi].week * (14 + 3);
+    monthHtml += '<span style="position:absolute;left:' + leftOffset + 'px">' + months[mi].month + '</span>';
+  }
+  monthsEl.style.position = 'relative';
+  monthsEl.style.height = '16px';
+  monthsEl.innerHTML = monthHtml;
+}
+
+function renderBurndownChart(data) {
+  var textMuted = getThemeColor('--text-muted');
+  var gridColor = getThemeColor('--chart-grid');
+  var accentGreen = getThemeColor('--accent-green-text');
+  var accentBlue = getThemeColor('--accent-blue');
+
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  var labels = [];
+  var completedCumulative = [];
+  var createdCumulative = [];
+  var totalCompleted = 0;
+  var totalCreated = 0;
+
+  for (var d = 29; d >= 0; d--) {
+    var date = new Date(today);
+    date.setDate(date.getDate() - d);
+    var dateStr = date.toISOString().split('T')[0];
+    labels.push(dateStr);
+
+    var dayCompleted = 0;
+    var dayCreated = 0;
+
+    (data.tasks || []).forEach(function(t) {
+      var updated = (t.updated || t.created || '').split('T')[0];
+      var created = (t.created || '').split('T')[0];
+      if (t.status === 'done' && updated === dateStr) dayCompleted++;
+      if (created === dateStr) dayCreated++;
+    });
+
+    totalCompleted += dayCompleted;
+    totalCreated += dayCreated;
+    completedCumulative.push(totalCompleted);
+    createdCumulative.push(totalCreated);
+  }
+
+  var ctx = document.getElementById('burndownChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels.map(function(l) {
+        var parts = l.split('-');
+        return parts[1] + '/' + parts[2];
+      }),
+      datasets: [
+        {
+          label: 'Tasks Created (cumulative)',
+          data: createdCumulative,
+          borderColor: accentBlue || '#58a6ff',
+          backgroundColor: (accentBlue || '#58a6ff') + '20',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderWidth: 2
+        },
+        {
+          label: 'Tasks Completed (cumulative)',
+          data: completedCumulative,
+          borderColor: accentGreen || '#3fb950',
+          backgroundColor: (accentGreen || '#3fb950') + '20',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderWidth: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: textMuted || '#8b949e',
+            stepSize: 1
+          },
+          grid: { color: gridColor || '#21262d' }
+        },
+        x: {
+          ticks: {
+            color: textMuted || '#8b949e',
+            maxRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 10
+          },
+          grid: { display: false }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: textMuted || '#8b949e',
+            padding: 16,
+            usePointStyle: true
+          }
+        },
+        tooltip: {
+          backgroundColor: getThemeColor('--bg-secondary') || '#161b22',
+          titleColor: getThemeColor('--text-primary') || '#f0f6fc',
+          bodyColor: getThemeColor('--text-secondary') || '#c9d1d9',
+          borderColor: getThemeColor('--border-primary') || '#30363d',
+          borderWidth: 1
+        }
+      }
+    }
+  });
+}
+
+function renderSparkline(data) {
+  var trend = LL.weeklyCompletionTrend(data.tasks);
+  var container = document.getElementById('sparkline-container');
+  var details = document.getElementById('sparkline-details');
+
+  var svg = LL.sparklineSVG(trend, 200, 40);
+  container.innerHTML = svg;
+
+  var total = trend.reduce(function(a, b) { return a + b; }, 0);
+  var latest = trend[trend.length - 1];
+  var prev = trend[trend.length - 2];
+  var diff = latest - prev;
+  var arrow = diff > 0 ? '&#9650;' : diff < 0 ? '&#9660;' : '&#8212;';
+  var arrowColor = diff > 0 ? 'var(--accent-green-text)' : diff < 0 ? 'var(--accent-red)' : 'var(--text-muted)';
+
+  details.innerHTML =
+    '<div><strong style="color:var(--text-primary)">' + total + '</strong> tasks completed (7 weeks)</div>' +
+    '<div>This week: <strong style="color:var(--text-primary)">' + latest + '</strong> ' +
+    '<span style="color:' + arrowColor + '">' + arrow + ' ' + Math.abs(diff) + '</span> vs last week</div>';
+}
+
+function renderTimeline(data) {
+  var items = [];
+
+  (data.tasks || []).forEach(function(t) {
+    items.push({
+      date: t.updated || t.created,
+      type: 'task',
+      title: t.title || t.id,
+      body: t.status + (t.project ? ' - ' + t.project : ''),
+      status: t.status
+    });
+  });
+
+  (data.logs || []).forEach(function(l) {
+    var summary = l.body ? l.body.split('\n').find(function(line) { return line.trim(); }) : 'Log entry';
+    if (summary) summary = summary.replace(/^#+\s*/, '').substring(0, 100);
+    items.push({
+      date: l.date,
+      type: 'log',
+      title: summary,
+      body: LL.formatDate(l.date)
+    });
+  });
+
+  (data.ideas || []).forEach(function(idea) {
+    var summary = idea.body ? idea.body.split('\n').find(function(line) { return line.trim(); }) : 'New idea';
+    if (summary) summary = summary.replace(/^#+\s*/, '').substring(0, 100);
+    items.push({
+      date: idea.created,
+      type: 'idea',
+      title: summary,
+      body: idea.status || 'raw',
+      status: idea.status
+    });
+  });
+
+  (data.projects || []).forEach(function(p) {
+    items.push({
+      date: p.created,
+      type: 'project',
+      title: p.name || p.id,
+      body: p.status,
+      status: p.status
+    });
+  });
+
+  items.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+
+  var timelineEl = document.getElementById('timeline-view');
+
+  if (items.length === 0) {
+    timelineEl.innerHTML = '<div class="empty-state">No activity to display.</div>';
+    return;
+  }
+
+  var typeLabels = { task: 'Task', log: 'Log', idea: 'Idea', project: 'Project' };
+  var html = '';
+
+  items.forEach(function(item) {
+    var badgeHtml = '';
+    if (item.status) {
+      badgeHtml = ' <span class="badge ' + LL.badgeClass(item.status) + '">' + item.status + '</span>';
+    }
+    html += '<div class="timeline-item type-' + item.type + '">' +
+      '<div class="timeline-date">' + LL.formatDate(item.date) + ' &middot; ' + typeLabels[item.type] + '</div>' +
+      '<div class="timeline-content">' +
+        '<div class="tl-title">' + item.title + badgeHtml + '</div>' +
+        '<div class="tl-body">' + item.body + '</div>' +
+      '</div>' +
+    '</div>';
+  });
+
+  timelineEl.innerHTML = html;
+}
+
 async function loadDashboard() {
   try {
     var res = await fetch('data/index.json');
@@ -134,8 +493,10 @@ async function loadDashboard() {
     dashboardData = data;
     var stats = data.stats;
 
+    // Header
     document.getElementById('generated-at').textContent = 'Last updated: ' + LL.formatDate(data.generated_at);
 
+    // Stats grid
     document.getElementById('stat-projects').textContent = stats.total_projects;
     document.getElementById('stat-projects-detail').textContent = stats.active_projects + ' active';
     document.getElementById('stat-tasks').textContent = stats.total_tasks;
@@ -172,6 +533,14 @@ async function loadDashboard() {
       '<div>' + ws.tasksCreated + ' tasks created</div>' +
       '<div>' + ws.logEntries + ' log entries</div>';
 
+    // Activity Heatmap
+    renderHeatmap(data);
+
+    // Read theme-aware colors for charts
+    var textMuted = getThemeColor('--text-muted');
+    var gridColor = getThemeColor('--chart-grid');
+    var bgPrimary = getThemeColor('--bg-primary');
+
     // Task pie chart
     var taskCtx = document.getElementById('taskPieChart').getContext('2d');
     new Chart(taskCtx, {
@@ -180,8 +549,12 @@ async function loadDashboard() {
         labels: ['Done', 'In Progress', 'Todo'],
         datasets: [{
           data: [stats.done_tasks, stats.in_progress_tasks, stats.todo_tasks],
-          backgroundColor: ['#238636', '#d29922', '#8b949e'],
-          borderColor: '#0d1117',
+          backgroundColor: [
+            getThemeColor('--accent-green') || '#238636',
+            getThemeColor('--accent-yellow') || '#d29922',
+            textMuted || '#8b949e'
+          ],
+          borderColor: bgPrimary || '#0d1117',
           borderWidth: 2
         }]
       },
@@ -189,7 +562,14 @@ async function loadDashboard() {
         responsive: true,
         maintainAspectRatio: true,
         plugins: {
-          legend: { position: 'bottom', labels: { color: '#c9d1d9', padding: 16, usePointStyle: true } }
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: getThemeColor('--text-secondary') || '#c9d1d9',
+              padding: 16,
+              usePointStyle: true
+            }
+          }
         }
       }
     });
@@ -200,10 +580,15 @@ async function loadDashboard() {
       var s = p.status || 'unknown';
       projectStatuses[s] = (projectStatuses[s] || 0) + 1;
     });
-    var statusColors = { active: '#238636', planning: '#1f6feb', done: '#238636', archived: '#8b949e' };
+    var statusColors = {
+      active: getThemeColor('--accent-green') || '#238636',
+      planning: getThemeColor('--accent-blue-bg') || '#1f6feb',
+      done: getThemeColor('--accent-green') || '#238636',
+      archived: textMuted || '#8b949e'
+    };
     var projectLabels = Object.keys(projectStatuses);
     var projectData = Object.values(projectStatuses);
-    var projectColors = projectLabels.map(function(l) { return statusColors[l.toLowerCase()] || '#8b949e'; });
+    var projectColors = projectLabels.map(function(l) { return statusColors[l.toLowerCase()] || textMuted || '#8b949e'; });
 
     var projCtx = document.getElementById('projectBarChart').getContext('2d');
     new Chart(projCtx, {
@@ -222,12 +607,25 @@ async function loadDashboard() {
         responsive: true,
         maintainAspectRatio: true,
         scales: {
-          y: { beginAtZero: true, ticks: { color: '#8b949e', stepSize: 1 }, grid: { color: '#21262d' } },
-          x: { ticks: { color: '#8b949e' }, grid: { display: false } }
+          y: {
+            beginAtZero: true,
+            ticks: { color: textMuted || '#8b949e', stepSize: 1 },
+            grid: { color: gridColor || '#21262d' }
+          },
+          x: {
+            ticks: { color: textMuted || '#8b949e' },
+            grid: { display: false }
+          }
         },
         plugins: { legend: { display: false } }
       }
     });
+
+    // Burndown chart
+    renderBurndownChart(data);
+
+    // Sparkline
+    renderSparkline(data);
 
     // Overdue / Due Soon tasks
     var dueTasks = (data.tasks || []).filter(function(t) {
@@ -255,10 +653,17 @@ async function loadDashboard() {
       }).join('');
     }
 
+    // Timeline
+    renderTimeline(data);
+
     // Recent activity
     var activities = [];
     (data.tasks || []).forEach(function(t) {
-      activities.push({ date: t.updated || t.created, text: '<span class="badge ' + LL.badgeClass(t.status) + '">' + t.status + '</span> ' + t.title, type: 'task' });
+      activities.push({
+        date: t.updated || t.created,
+        text: '<span class="badge ' + LL.badgeClass(t.status) + '">' + t.status + '</span> ' + t.title,
+        type: 'task'
+      });
     });
     (data.logs || []).forEach(function(l) {
       var summary = l.body ? l.body.split('\n')[0].substring(0, 120) : 'Log entry';
@@ -266,21 +671,29 @@ async function loadDashboard() {
     });
     (data.ideas || []).forEach(function(i) {
       var summary = i.body ? i.body.split('\n')[0].substring(0, 120) : 'New idea';
-      activities.push({ date: i.created, text: '<span class="badge ' + LL.badgeClass(i.status) + '">' + (i.status || 'raw') + '</span> ' + summary, type: 'idea' });
+      activities.push({
+        date: i.created,
+        text: '<span class="badge ' + LL.badgeClass(i.status) + '">' + (i.status || 'raw') + '</span> ' + summary,
+        type: 'idea'
+      });
     });
     activities.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
     activities = activities.slice(0, 10);
 
     var actEl = document.getElementById('recent-activity');
     if (activities.length === 0) {
-      actEl.innerHTML = '<p style="color:#8b949e">No recent activity.</p>';
+      actEl.innerHTML = '<p style="color:var(--text-muted)">No recent activity.</p>';
     } else {
       actEl.innerHTML = activities.map(function(a) {
-        return '<div class="activity-item"><span class="activity-date">' + LL.formatDate(a.date) + '</span><span class="activity-text">' + a.text + '</span></div>';
+        return '<div class="activity-item">' +
+          '<span class="activity-date">' + LL.formatDate(a.date) + '</span>' +
+          '<span class="activity-text">' + a.text + '</span>' +
+        '</div>';
       }).join('');
     }
+
   } catch (err) {
-    document.getElementById('recent-activity').innerHTML = '<p style="color:#f85149">Failed to load data. Make sure data/index.json exists.</p>';
+    document.getElementById('recent-activity').innerHTML = '<p style="color:var(--accent-red)">Failed to load data. Make sure data/index.json exists.</p>';
     console.error('Failed to load dashboard data:', err);
   }
 }

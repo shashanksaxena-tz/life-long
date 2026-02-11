@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Aggregation script: reads all Markdown files in /projects, /tasks, /logs, /ideas
-and generates /data/index.json for the static site to consume.
+Aggregation script: reads all Markdown files in /projects, /tasks, /logs, /ideas,
+/goals, /habits and generates /data/index.json for the static site to consume.
 """
 
 import json
@@ -17,6 +17,8 @@ DIRS = {
     "tasks": REPO_ROOT / "tasks",
     "logs": REPO_ROOT / "logs",
     "ideas": REPO_ROOT / "ideas",
+    "goals": REPO_ROOT / "goals",
+    "habits": REPO_ROOT / "habits",
 }
 
 OUTPUT = REPO_ROOT / "data" / "index.json"
@@ -68,7 +70,22 @@ def collect_files(directory: Path) -> list[dict]:
     return results
 
 
-def compute_stats(projects: list, tasks: list, logs: list, ideas: list) -> dict:
+def parse_time_spent(time_str: str) -> int:
+    """Parse a time_spent string like '2h', '30m', or '1h30m' into total minutes."""
+    if not time_str or not isinstance(time_str, str):
+        return 0
+    total = 0
+    h_match = re.search(r"(\d+)h", time_str)
+    m_match = re.search(r"(\d+)m", time_str)
+    if h_match:
+        total += int(h_match.group(1)) * 60
+    if m_match:
+        total += int(m_match.group(1))
+    return total
+
+
+def compute_stats(projects: list, tasks: list, logs: list, ideas: list,
+                  goals: list, habits: list) -> dict:
     """Compute aggregate statistics."""
     total_tasks = len(tasks)
     done_tasks = sum(1 for t in tasks if t.get("status") == "done")
@@ -92,7 +109,7 @@ def compute_stats(projects: list, tasks: list, logs: list, ideas: list) -> dict:
 
     # Collect all tags
     all_tags = set()
-    for item in tasks + projects + ideas:
+    for item in tasks + projects + ideas + goals + habits:
         tags = item.get("tags", [])
         if isinstance(tags, list):
             all_tags.update(tags)
@@ -122,6 +139,26 @@ def compute_stats(projects: list, tasks: list, logs: list, ideas: list) -> dict:
         if p:
             priority_counts[p] = priority_counts.get(p, 0) + 1
 
+    # Goals stats
+    total_goals = len(goals)
+    active_goals = sum(1 for g in goals if g.get("status") == "active")
+
+    # Habits stats
+    total_habits = len(habits)
+    active_habits = sum(1 for h in habits if h.get("status") == "active")
+
+    # Time tracking: sum all tasks' time_spent fields
+    total_minutes = sum(parse_time_spent(t.get("time_spent", "")) for t in tasks)
+    hours, mins = divmod(total_minutes, 60)
+    if hours and mins:
+        total_time_spent = f"{hours}h{mins}m"
+    elif hours:
+        total_time_spent = f"{hours}h"
+    elif mins:
+        total_time_spent = f"{mins}m"
+    else:
+        total_time_spent = "0m"
+
     return {
         "total_projects": len(projects),
         "active_projects": active_projects,
@@ -135,6 +172,11 @@ def compute_stats(projects: list, tasks: list, logs: list, ideas: list) -> dict:
         "total_ideas": len(ideas),
         "total_logs": len(logs),
         "logs_this_week": recent_logs,
+        "total_goals": total_goals,
+        "active_goals": active_goals,
+        "total_habits": total_habits,
+        "active_habits": active_habits,
+        "total_time_spent": total_time_spent,
         "all_tags": sorted(all_tags),
     }
 
@@ -154,8 +196,10 @@ def main():
     tasks = collect_files(DIRS["tasks"])
     logs = collect_files(DIRS["logs"])
     ideas = collect_files(DIRS["ideas"])
+    goals = collect_files(DIRS["goals"])
+    habits = collect_files(DIRS["habits"])
 
-    stats = compute_stats(projects, tasks, logs, ideas)
+    stats = compute_stats(projects, tasks, logs, ideas, goals, habits)
 
     output = {
         "generated_at": datetime.now().isoformat(),
@@ -164,13 +208,16 @@ def main():
         "tasks": clean_for_json(tasks),
         "logs": clean_for_json(logs),
         "ideas": clean_for_json(ideas),
+        "goals": clean_for_json(goals),
+        "habits": clean_for_json(habits),
     }
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"Generated {OUTPUT} with {stats['total_projects']} projects, "
           f"{stats['total_tasks']} tasks, {stats['total_logs']} logs, "
-          f"{stats['total_ideas']} ideas.")
+          f"{stats['total_ideas']} ideas, {stats['total_goals']} goals, "
+          f"{stats['total_habits']} habits.")
 
 
 if __name__ == "__main__":

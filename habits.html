@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Habits - Life Long</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d1117">
+</head>
+<body>
+<nav>
+  <div class="brand">Life Long</div>
+  <div class="links">
+    <a href="index.html">Dashboard</a>
+    <a href="projects.html">Projects</a>
+    <a href="tasks.html">Tasks</a>
+    <a href="logs.html">Logs</a>
+    <a href="ideas.html">Ideas</a>
+    <a href="goals.html">Goals</a>
+    <a href="habits.html" class="active">Habits</a>
+  </div>
+</nav>
+
+<div class="container">
+  <h1>Habits</h1>
+  <p class="subtitle" id="habit-count">Loading habits...</p>
+
+  <div class="search-bar">
+    <input type="text" class="search-input" id="search-input" placeholder="Search habits... (press / to focus)" oninput="applyFilters()">
+    <div class="export-bar">
+      <button class="export-btn" onclick="exportHabits('json')">JSON</button>
+      <button class="export-btn" onclick="exportHabits('csv')">CSV</button>
+    </div>
+  </div>
+
+  <div class="filters" id="frequency-filters"></div>
+
+  <div class="filters" id="status-filters"></div>
+
+  <div class="habit-grid" id="habits-list">
+    <div class="empty-state">Loading...</div>
+  </div>
+</div>
+
+<script src="utils.js"></script>
+<script>
+var allHabits = [];
+var currentFrequencyFilter = 'all';
+var currentStatusFilter = 'all';
+
+function exportHabits(format) {
+  if (format === 'json') {
+    LL.exportJSON(allHabits, 'life-long-habits.json');
+  } else {
+    LL.exportCSV(allHabits, [
+      { key: 'id', label: 'ID' },
+      { key: 'name', label: 'Name' },
+      { key: 'frequency', label: 'Frequency' },
+      { key: 'status', label: 'Status' },
+      { key: 'tags', label: 'Tags' },
+      { key: 'check_dates', label: 'Check Dates' },
+      { key: 'created', label: 'Created' }
+    ], 'life-long-habits.csv');
+  }
+}
+
+function setFrequencyFilter(filter) {
+  currentFrequencyFilter = filter;
+  document.querySelectorAll('#frequency-filters .filter-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  applyFilters();
+}
+
+function setStatusFilter(filter) {
+  currentStatusFilter = filter;
+  document.querySelectorAll('#status-filters .filter-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  applyFilters();
+}
+
+function applyFilters() {
+  var freqFilter = currentFrequencyFilter;
+  var statusFilter = currentStatusFilter;
+  var searchQuery = document.getElementById('search-input').value.trim();
+
+  var filtered = allHabits.filter(function(habit) {
+    if (freqFilter !== 'all' && (habit.frequency || '').toLowerCase() !== freqFilter) return false;
+    if (statusFilter !== 'all' && (habit.status || 'active').toLowerCase() !== statusFilter) return false;
+    if (searchQuery && !LL.matchesSearch(habit, searchQuery, ['name', 'id', 'tags', 'frequency', 'status'])) return false;
+    return true;
+  });
+
+  renderHabits(filtered);
+}
+
+function calculateStreak(checkDates, frequency) {
+  if (!checkDates || checkDates.length === 0) return 0;
+
+  var sorted = checkDates.slice().sort().reverse();
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var todayStr = today.toISOString().split('T')[0];
+
+  if (frequency === 'weekly') {
+    // For weekly habits, check if there's a check within each rolling 7-day window
+    var streak = 0;
+    var windowEnd = new Date(today);
+    var windowStart = new Date(today);
+    windowStart.setDate(windowStart.getDate() - 6);
+
+    while (true) {
+      var endStr = windowEnd.toISOString().split('T')[0];
+      var startStr = windowStart.toISOString().split('T')[0];
+      var found = sorted.some(function(d) { return d >= startStr && d <= endStr; });
+      if (found) {
+        streak++;
+        windowEnd.setDate(windowEnd.getDate() - 7);
+        windowStart.setDate(windowStart.getDate() - 7);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
+  // Daily frequency
+  var streak = 0;
+  var checkDate = new Date(today);
+
+  // Check if today or yesterday has an entry to start the streak
+  if (sorted.indexOf(todayStr) !== -1) {
+    streak = 1;
+    checkDate.setDate(checkDate.getDate() - 1);
+  } else {
+    var yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    var yesterdayStr = yesterday.toISOString().split('T')[0];
+    if (sorted.indexOf(yesterdayStr) !== -1) {
+      streak = 1;
+      checkDate = new Date(yesterday);
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      return 0;
+    }
+  }
+
+  while (true) {
+    var ds = checkDate.toISOString().split('T')[0];
+    if (sorted.indexOf(ds) !== -1) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+}
+
+function buildLast30Days(checkDates) {
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var dates = checkDates || [];
+  var html = '';
+
+  for (var d = 29; d >= 0; d--) {
+    var dd = new Date(today);
+    dd.setDate(dd.getDate() - d);
+    var dateStr = dd.toISOString().split('T')[0];
+    var isDone = dates.indexOf(dateStr) !== -1;
+    var cls = 'habit-check';
+    if (isDone) cls += ' done';
+    html += '<div class="' + cls + '" title="' + dateStr + (isDone ? ' (done)' : '') + '"></div>';
+  }
+
+  return html;
+}
+
+function renderHabits(habits) {
+  var list = document.getElementById('habits-list');
+  if (habits.length === 0) {
+    list.innerHTML = '<div class="empty-state">No habits match the current filters.</div>';
+    return;
+  }
+
+  list.innerHTML = habits.map(function(habit) {
+    var streak = calculateStreak(habit.check_dates, habit.frequency);
+    var streakLabel = streak === 1 ? '1 day streak' : streak + ' ' + (habit.frequency === 'weekly' ? 'week' : 'day') + ' streak';
+    var tags = (habit.tags || []).map(function(t) { return '<span class="tag">' + t + '</span>'; }).join('');
+    var freqBadgeClass = habit.frequency === 'daily' ? 'badge-in-progress' : 'badge-planning';
+    var statusBadgeClass = LL.badgeClass(habit.status || 'active');
+
+    return '<div class="habit-card">' +
+      '<div class="habit-name">' + (habit.name || habit.id) + '</div>' +
+      '<div class="habit-streak">' +
+        '<span style="color:' + (streak > 0 ? 'var(--accent-green-text)' : 'var(--text-muted)') + ';font-weight:600">' + streakLabel + '</span>' +
+      '</div>' +
+      '<div class="habit-checks">' + buildLast30Days(habit.check_dates) + '</div>' +
+      '<div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-top:0.75rem">' +
+        '<span class="badge ' + freqBadgeClass + '">' + (habit.frequency || 'daily') + '</span>' +
+        '<span class="badge ' + statusBadgeClass + '">' + (habit.status || 'active') + '</span>' +
+        tags +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function loadHabits() {
+  try {
+    var res = await fetch('data/index.json');
+    var data = await res.json();
+    allHabits = data.habits || [];
+
+    allHabits.sort(function(a, b) { return new Date(b.created) - new Date(a.created); });
+
+    document.getElementById('habit-count').textContent = allHabits.length + ' habit' + (allHabits.length !== 1 ? 's' : '');
+
+    // Build frequency filter buttons
+    var frequencies = {};
+    allHabits.forEach(function(h) {
+      var f = (h.frequency || 'daily').toLowerCase();
+      frequencies[f] = (frequencies[f] || 0) + 1;
+    });
+    var freqHtml = '<button class="filter-btn active" data-filter="all" onclick="setFrequencyFilter(\'all\')">All (' + allHabits.length + ')</button>';
+    Object.keys(frequencies).forEach(function(f) {
+      freqHtml += '<button class="filter-btn" data-filter="' + f + '" onclick="setFrequencyFilter(\'' + f + '\')">' + f.charAt(0).toUpperCase() + f.slice(1) + ' (' + frequencies[f] + ')</button>';
+    });
+    document.getElementById('frequency-filters').innerHTML = freqHtml;
+
+    // Build status filter buttons
+    var statuses = {};
+    allHabits.forEach(function(h) {
+      var s = (h.status || 'active').toLowerCase();
+      statuses[s] = (statuses[s] || 0) + 1;
+    });
+    var statusHtml = '<button class="filter-btn active" data-filter="all" onclick="setStatusFilter(\'all\')">All</button>';
+    Object.keys(statuses).forEach(function(s) {
+      statusHtml += '<button class="filter-btn" data-filter="' + s + '" onclick="setStatusFilter(\'' + s + '\')">' + s.charAt(0).toUpperCase() + s.slice(1) + ' (' + statuses[s] + ')</button>';
+    });
+    document.getElementById('status-filters').innerHTML = statusHtml;
+
+    applyFilters();
+  } catch (err) {
+    document.getElementById('habits-list').innerHTML = '<div class="empty-state" style="color:var(--accent-red)">Failed to load data. Make sure data/index.json exists.</div>';
+    console.error('Failed to load habits:', err);
+  }
+}
+
+loadHabits();
+</script>
+<script src="app.js"></script>
+</body>
+</html>

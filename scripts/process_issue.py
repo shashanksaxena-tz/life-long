@@ -8,6 +8,8 @@ Supports these commands in the issue title:
   - "Add Log: <summary>"
   - "Add Idea: <idea text>"
   - "Update Task: <task-id> status <new-status>"
+  - "Create Goal: <title>"
+  - "Create Habit: <name>"
 
 Also supports optional AI-powered natural language parsing via OpenRouter API.
 Set OPENROUTER_API_KEY secret to enable. Falls back to template parsing if unavailable.
@@ -57,6 +59,32 @@ def next_idea_id() -> str:
     parts = last.split("-")
     num = int(parts[-1]) + 1
     return f"idea-{today[:4]}-{num:03d}"
+
+
+def next_goal_id() -> str:
+    """Generate the next goal ID based on existing files."""
+    goals_dir = REPO_ROOT / "goals"
+    goals_dir.mkdir(parents=True, exist_ok=True)
+    existing = sorted(goals_dir.glob("goal-*.md"))
+    if not existing:
+        return f"goal-{today[:4]}-001"
+    last = existing[-1].stem
+    parts = last.split("-")
+    num = int(parts[-1]) + 1
+    return f"goal-{today[:4]}-{num:03d}"
+
+
+def next_habit_id() -> str:
+    """Generate the next habit ID based on existing files."""
+    habits_dir = REPO_ROOT / "habits"
+    habits_dir.mkdir(parents=True, exist_ok=True)
+    existing = sorted(habits_dir.glob("habit-*.md"))
+    if not existing:
+        return "habit-001"
+    last = existing[-1].stem
+    parts = last.split("-")
+    num = int(parts[-1]) + 1
+    return f"habit-{num:03d}"
 
 
 def parse_body_fields(body_text: str) -> dict:
@@ -118,7 +146,7 @@ Issue Title: {issue_title}
 Issue Body: {issue_body}
 
 Return ONLY a JSON object with these fields:
-- "action": one of "create_project", "create_task", "add_log", "add_idea", "update_task"
+- "action": one of "create_project", "create_task", "add_log", "add_idea", "update_task", "create_goal", "create_habit"
 - "name" or "title": the name/title of the item
 - "project": project ID if applicable
 - "tags": comma-separated tags if mentioned
@@ -317,6 +345,74 @@ def update_task(task_id: str, new_status: str):
     print(f"Updated task: {filepath}")
 
 
+def create_goal(goal_title: str):
+    fields = parse_body_fields(body)
+    goal_title = goal_title or fields.get("title", "untitled")
+    target_date = fields.get("target date", fields.get("target_date", ""))
+    linked_tasks = fields.get("linked tasks", fields.get("linked_tasks", ""))
+    tags = fields.get("tags", "")
+    description = fields.get("description", goal_title)
+
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
+    tag_str = f"[{', '.join(tag_list)}]" if tag_list else "[]"
+
+    linked_list = [t.strip() for t in linked_tasks.split(",") if t.strip()] if linked_tasks else []
+    linked_yaml = "\n".join(f"  - {t}" for t in linked_list) if linked_list else "  []"
+
+    goal_id = next_goal_id()
+    goals_dir = REPO_ROOT / "goals"
+    goals_dir.mkdir(parents=True, exist_ok=True)
+    filepath = goals_dir / f"{goal_id}.md"
+
+    content = f"""---
+id: {goal_id}
+title: {goal_title}
+status: active
+target_date: {target_date}
+linked_tasks:
+{linked_yaml}
+tags: {tag_str}
+created: {today}
+---
+
+## Description
+{description}
+"""
+    filepath.write_text(content, encoding="utf-8")
+    print(f"Created goal: {filepath}")
+
+
+def create_habit(habit_name: str):
+    fields = parse_body_fields(body)
+    habit_name = habit_name or fields.get("name", "untitled")
+    frequency = fields.get("frequency", "daily")
+    tags = fields.get("tags", "")
+
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
+    tag_str = f"[{', '.join(tag_list)}]" if tag_list else "[]"
+
+    habit_id = next_habit_id()
+    habits_dir = REPO_ROOT / "habits"
+    habits_dir.mkdir(parents=True, exist_ok=True)
+    filepath = habits_dir / f"{habit_id}.md"
+
+    content = f"""---
+id: {habit_id}
+name: {habit_name}
+frequency: {frequency}
+status: active
+check_dates: []
+tags: {tag_str}
+created: {today}
+---
+
+## Habit
+{habit_name}
+"""
+    filepath.write_text(content, encoding="utf-8")
+    print(f"Created habit: {filepath}")
+
+
 # --- Intent matching ---
 
 # Try AI parsing first (non-blocking)
@@ -361,6 +457,14 @@ elif title_lower.startswith("update task:"):
         else:
             print(f"Could not parse update command: {rest}")
 
+elif title_lower.startswith("create goal:"):
+    goal_title = title.split(":", 1)[1].strip()
+    create_goal(goal_title)
+
+elif title_lower.startswith("create habit:"):
+    habit_name = title.split(":", 1)[1].strip()
+    create_habit(habit_name)
+
 elif ai_result and ai_result.get("action") != "unknown":
     # AI understood the intent even without a standard prefix
     action = ai_result["action"]
@@ -380,12 +484,16 @@ elif ai_result and ai_result.get("action") != "unknown":
             update_task(tid, ns)
         else:
             print(f"AI parsed update_task but missing task_id or new_status")
+    elif action == "create_goal":
+        create_goal(ai_result.get("title", ""))
+    elif action == "create_habit":
+        create_habit(ai_result.get("name", ""))
     else:
         print(f"AI returned unknown action: {action}")
 
 else:
     print(f"Unknown command in issue title: {title}")
-    print("Supported prefixes: Create Project:, Create Task:, Add Log:, Add Idea:, Update Task:")
+    print("Supported prefixes: Create Project:, Create Task:, Add Log:, Add Idea:, Update Task:, Create Goal:, Create Habit:")
     if openrouter_key:
         print("AI parsing was attempted but could not determine intent.")
     else:

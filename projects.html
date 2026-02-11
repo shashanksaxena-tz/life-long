@@ -17,6 +17,8 @@
     <a href="tasks.html">Tasks</a>
     <a href="logs.html">Logs</a>
     <a href="ideas.html">Ideas</a>
+    <a href="goals.html">Goals</a>
+    <a href="habits.html">Habits</a>
   </div>
 </nav>
 
@@ -45,58 +47,38 @@ var allTasks = [];
 var currentFilter = 'all';
 
 function exportProjects(format) {
-  if (format === 'json') {
-    LL.exportJSON(allProjects, 'life-long-projects.json');
-  } else {
-    LL.exportCSV(allProjects, [
-      { key: 'id', label: 'ID' },
-      { key: 'name', label: 'Name' },
-      { key: 'status', label: 'Status' },
-      { key: 'tags', label: 'Tags' },
-      { key: 'created', label: 'Created' }
-    ], 'life-long-projects.csv');
-  }
+  if (format === 'json') LL.exportJSON(allProjects, 'life-long-projects.json');
+  else LL.exportCSV(allProjects, [
+    { key: 'id', label: 'ID' }, { key: 'name', label: 'Name' }, { key: 'status', label: 'Status' },
+    { key: 'tags', label: 'Tags' }, { key: 'created', label: 'Created' }
+  ], 'life-long-projects.csv');
 }
 
 function getProjectTaskCounts(projectId) {
   var total = 0, done = 0;
-  allTasks.forEach(function(t) {
-    if (t.project === projectId) {
-      total++;
-      if (t.status === 'done') done++;
-    }
-  });
+  allTasks.forEach(function(t) { if (t.project === projectId) { total++; if (t.status === 'done') done++; } });
   return { total: total, done: done };
 }
 
 function renderProjects(filter) {
   currentFilter = filter;
   var searchQuery = document.getElementById('search-input').value.trim();
-
   var filtered = allProjects;
-  if (filter !== 'all') {
-    filtered = allProjects.filter(function(p) { return (p.status || '').toLowerCase() === filter; });
-  }
-  if (searchQuery) {
-    filtered = filtered.filter(function(p) {
-      return LL.matchesSearch(p, searchQuery, ['name', 'id', 'tags', 'body', 'status']);
-    });
-  }
+  if (filter !== 'all') filtered = allProjects.filter(function(p) { return (p.status || '').toLowerCase() === filter; });
+  if (searchQuery) filtered = filtered.filter(function(p) { return LL.matchesSearch(p, searchQuery, ['name', 'id', 'tags', 'body', 'status']); });
 
-  document.querySelectorAll('.filter-btn').forEach(function(btn) {
-    btn.classList.toggle('active', btn.dataset.filter === filter);
-  });
+  document.querySelectorAll('.filter-btn').forEach(function(btn) { btn.classList.toggle('active', btn.dataset.filter === filter); });
 
   var list = document.getElementById('projects-list');
-  if (filtered.length === 0) {
-    list.innerHTML = '<div class="empty-state">No projects found.</div>';
-    return;
-  }
+  if (filtered.length === 0) { list.innerHTML = '<div class="empty-state">No projects found.</div>'; return; }
 
   list.innerHTML = filtered.map(function(p, i) {
     var tags = (p.tags || []).map(function(t) { return '<span class="tag">' + t + '</span>'; }).join('');
     var counts = getProjectTaskCounts(p.id);
     var taskInfo = counts.total > 0 ? counts.done + '/' + counts.total + ' tasks done' : 'No tasks';
+    var progressHtml = LL.progressBarHTML(counts.done, counts.total);
+    var trend = LL.weeklyCompletionTrend(allTasks.filter(function(t) { return t.project === p.id; }));
+    var sparkHtml = LL.sparklineSVG(trend, 60, 16);
 
     return '<div class="project-card" data-index="' + i + '">' +
       '<div class="project-header" onclick="toggleProject(this)">' +
@@ -105,9 +87,11 @@ function renderProjects(filter) {
           '<div class="project-meta">' +
             '<span class="badge ' + LL.badgeClass(p.status) + '">' + (p.status || 'unknown') + '</span>' +
             '<span class="project-task-count">' + taskInfo + '</span>' +
+            (sparkHtml ? '<span>' + sparkHtml + '</span>' : '') +
             '<span>Created ' + LL.formatDate(p.created) + '</span>' +
           '</div>' +
           (tags ? '<div class="project-tags">' + tags + '</div>' : '') +
+          progressHtml +
         '</div>' +
         '<span class="project-toggle">&#9654;</span>' +
       '</div>' +
@@ -136,11 +120,7 @@ async function loadProjects() {
     document.getElementById('project-count').textContent = allProjects.length + ' project' + (allProjects.length !== 1 ? 's' : '');
 
     var statuses = {};
-    allProjects.forEach(function(p) {
-      var s = (p.status || 'unknown').toLowerCase();
-      statuses[s] = (statuses[s] || 0) + 1;
-    });
-
+    allProjects.forEach(function(p) { var s = (p.status || 'unknown').toLowerCase(); statuses[s] = (statuses[s] || 0) + 1; });
     var filtersHtml = '<button class="filter-btn active" data-filter="all" onclick="renderProjects(\'all\')">All (' + allProjects.length + ')</button>';
     Object.keys(statuses).forEach(function(s) {
       filtersHtml += '<button class="filter-btn" data-filter="' + s + '" onclick="renderProjects(\'' + s + '\')">' + s.charAt(0).toUpperCase() + s.slice(1) + ' (' + statuses[s] + ')</button>';
@@ -149,7 +129,7 @@ async function loadProjects() {
 
     renderProjects('all');
   } catch (err) {
-    document.getElementById('projects-list').innerHTML = '<div class="empty-state" style="color:#f85149">Failed to load data. Make sure data/index.json exists.</div>';
+    document.getElementById('projects-list').innerHTML = '<div class="empty-state" style="color:var(--accent-red)">Failed to load data.</div>';
     console.error('Failed to load projects:', err);
   }
 }

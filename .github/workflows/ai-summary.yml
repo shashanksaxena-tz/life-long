@@ -1,0 +1,41 @@
+name: AI Weekly Summary
+
+on:
+  schedule:
+    - cron: '0 10 * * 1'  # Every Monday at 10 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ai-summary:
+    runs-on: ubuntu-latest
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/design-github-system-RCORX
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate AI summary
+        run: python scripts/ai_summary.py
+
+      - name: Generate RSS feed
+        run: python scripts/generate_feed.py
+
+      - name: Run aggregation
+        run: python scripts/aggregate.py
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add digests/ feed.xml data/index.json
+          git diff --cached --quiet || git commit -m "chore: ai summary and feed update $(date +%Y-%m-%d) [auto]"
+          git push origin claude/design-github-system-RCORX

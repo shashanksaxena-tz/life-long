@@ -17,6 +17,8 @@
     <a href="tasks.html">Tasks</a>
     <a href="logs.html" class="active">Logs</a>
     <a href="ideas.html">Ideas</a>
+    <a href="goals.html">Goals</a>
+    <a href="habits.html">Habits</a>
   </div>
 </nav>
 
@@ -102,7 +104,7 @@ async function loadLogs() {
 
     renderLogs(allLogs);
   } catch (err) {
-    document.getElementById('logs-list').innerHTML = '<div class="empty-state" style="color:#f85149">Failed to load data. Make sure data/index.json exists.</div>';
+    document.getElementById('logs-list').innerHTML = '<div class="empty-state" style="color:var(--accent-red)">Failed to load data. Make sure data/index.json exists.</div>';
     console.error('Failed to load logs:', err);
   }
 }

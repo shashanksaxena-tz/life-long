@@ -17,12 +17,22 @@
     <a href="tasks.html" class="active">Tasks</a>
     <a href="logs.html">Logs</a>
     <a href="ideas.html">Ideas</a>
+    <a href="goals.html">Goals</a>
+    <a href="habits.html">Habits</a>
   </div>
 </nav>
 
 <div class="container">
-  <h1>Tasks</h1>
-  <p class="subtitle" id="task-count">Loading tasks...</p>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+    <div>
+      <h1>Tasks</h1>
+      <p class="subtitle" id="task-count">Loading tasks...</p>
+    </div>
+    <div class="view-toggle" id="view-toggle">
+      <button class="view-toggle-btn active" data-view="list" onclick="setView('list')">List</button>
+      <button class="view-toggle-btn" data-view="kanban" onclick="setView('kanban')">Kanban</button>
+    </div>
+  </div>
 
   <div class="search-bar">
     <input type="text" class="search-input" id="search-input" placeholder="Search tasks... (press / to focus)" oninput="applyFilters()">
@@ -59,8 +69,8 @@
     </div>
   </div>
 
-  <div class="sort-bar">
-    <span style="font-size:0.85rem;color:#8b949e">Sort by:</span>
+  <div class="sort-bar" id="sort-bar">
+    <span style="font-size:0.85rem;color:var(--text-muted)">Sort by:</span>
     <button class="sort-btn active" data-sort="updated" onclick="setSort('updated')">Updated</button>
     <button class="sort-btn" data-sort="created" onclick="setSort('created')">Created</button>
     <button class="sort-btn" data-sort="title" onclick="setSort('title')">Title</button>
@@ -71,6 +81,23 @@
   <div id="tasks-list">
     <div class="empty-state">Loading...</div>
   </div>
+
+  <div id="kanban-view" style="display:none">
+    <div class="kanban-board">
+      <div class="kanban-column" data-status="todo">
+        <div class="kanban-column-header">Todo <span class="count" id="kanban-todo-count">0</span></div>
+        <div class="kanban-column-body" id="kanban-todo"></div>
+      </div>
+      <div class="kanban-column" data-status="in-progress">
+        <div class="kanban-column-header">In Progress <span class="count" id="kanban-ip-count">0</span></div>
+        <div class="kanban-column-body" id="kanban-in-progress"></div>
+      </div>
+      <div class="kanban-column" data-status="done">
+        <div class="kanban-column-header">Done <span class="count" id="kanban-done-count">0</span></div>
+        <div class="kanban-column-body" id="kanban-done"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="utils.js"></script>
@@ -79,48 +106,44 @@ var allTasks = [];
 var currentStatusFilter = 'all';
 var currentSort = 'updated';
 var sortAsc = false;
-
+var currentView = 'list';
 var priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
 
 function exportTasks(format) {
-  if (format === 'json') {
-    LL.exportJSON(allTasks, 'life-long-tasks.json');
-  } else {
-    LL.exportCSV(allTasks, [
-      { key: 'id', label: 'ID' },
-      { key: 'title', label: 'Title' },
-      { key: 'project', label: 'Project' },
-      { key: 'status', label: 'Status' },
-      { key: 'priority', label: 'Priority' },
-      { key: 'due', label: 'Due Date' },
-      { key: 'tags', label: 'Tags' },
-      { key: 'created', label: 'Created' },
-      { key: 'updated', label: 'Updated' }
-    ], 'life-long-tasks.csv');
-  }
+  if (format === 'json') LL.exportJSON(allTasks, 'life-long-tasks.json');
+  else LL.exportCSV(allTasks, [
+    { key: 'id', label: 'ID' }, { key: 'title', label: 'Title' }, { key: 'project', label: 'Project' },
+    { key: 'status', label: 'Status' }, { key: 'priority', label: 'Priority' }, { key: 'due', label: 'Due Date' },
+    { key: 'tags', label: 'Tags' }, { key: 'created', label: 'Created' }, { key: 'updated', label: 'Updated' }
+  ], 'life-long-tasks.csv');
+}
+
+function setView(view) {
+  currentView = view;
+  document.querySelectorAll('#view-toggle .view-toggle-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.view === view);
+  });
+  document.getElementById('tasks-list').style.display = view === 'list' ? '' : 'none';
+  document.getElementById('kanban-view').style.display = view === 'kanban' ? '' : 'none';
+  document.getElementById('sort-bar').style.display = view === 'list' ? '' : 'none';
+  if (view === 'kanban') renderKanban();
 }
 
 function setSort(field) {
-  if (currentSort === field) {
-    sortAsc = !sortAsc;
-  } else {
-    currentSort = field;
-    sortAsc = false;
-  }
-  document.querySelectorAll('.sort-btn').forEach(function(btn) {
-    btn.classList.toggle('active', btn.dataset.sort === field);
-  });
+  if (currentSort === field) sortAsc = !sortAsc;
+  else { currentSort = field; sortAsc = false; }
+  document.querySelectorAll('.sort-btn').forEach(function(btn) { btn.classList.toggle('active', btn.dataset.sort === field); });
   applyFilters();
 }
 
-function applyFilters() {
+function getFilteredTasks() {
   var statusFilter = currentStatusFilter;
   var projectFilter = document.getElementById('project-filter').value;
   var tagFilter = document.getElementById('tag-filter').value;
   var priorityFilter = document.getElementById('priority-filter').value;
   var searchQuery = document.getElementById('search-input').value.trim();
 
-  var filtered = allTasks.filter(function(t) {
+  return allTasks.filter(function(t) {
     if (statusFilter !== 'all' && (t.status || '').toLowerCase().replace(/\s+/g, '-') !== statusFilter) return false;
     if (projectFilter !== 'all' && t.project !== projectFilter) return false;
     if (tagFilter !== 'all' && (t.tags || []).indexOf(tagFilter) === -1) return false;
@@ -128,12 +151,15 @@ function applyFilters() {
     if (searchQuery && !LL.matchesSearch(t, searchQuery, ['title', 'id', 'project', 'tags', 'body', 'status'])) return false;
     return true;
   });
+}
+
+function applyFilters() {
+  var filtered = getFilteredTasks();
 
   filtered.sort(function(a, b) {
     var valA, valB;
     if (currentSort === 'title') {
-      valA = (a.title || '').toLowerCase();
-      valB = (b.title || '').toLowerCase();
+      valA = (a.title || '').toLowerCase(); valB = (b.title || '').toLowerCase();
       return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
     } else if (currentSort === 'priority') {
       valA = priorityOrder[((a.priority || 'low')).toLowerCase()] || 3;
@@ -151,13 +177,12 @@ function applyFilters() {
   });
 
   renderTasks(filtered);
+  if (currentView === 'kanban') renderKanban();
 }
 
 function setStatusFilter(filter) {
   currentStatusFilter = filter;
-  document.querySelectorAll('#status-filters .filter-btn').forEach(function(btn) {
-    btn.classList.toggle('active', btn.dataset.filter === filter);
-  });
+  document.querySelectorAll('#status-filters .filter-btn').forEach(function(btn) { btn.classList.toggle('active', btn.dataset.filter === filter); });
   applyFilters();
 }
 
@@ -168,10 +193,7 @@ function toggleTaskBody(el) {
 
 function renderTasks(tasks) {
   var list = document.getElementById('tasks-list');
-  if (tasks.length === 0) {
-    list.innerHTML = '<div class="empty-state">No tasks match the current filters.</div>';
-    return;
-  }
+  if (tasks.length === 0) { list.innerHTML = '<div class="empty-state">No tasks match the current filters.</div>'; return; }
 
   list.innerHTML = tasks.map(function(t) {
     var tags = (t.tags || []).map(function(tag) { return '<span class="tag">' + tag + '</span>'; }).join('');
@@ -189,12 +211,70 @@ function renderTasks(tasks) {
         (t.priority ? '<span class="badge ' + LL.priorityBadgeClass(t.priority) + '">' + t.priority + '</span>' : '') +
         (t.project ? '<span>Project: <a href="projects.html" onclick="event.stopPropagation()">' + t.project + '</a></span>' : '') +
         (t.due && t.status !== 'done' ? '<span class="task-due ' + dueClass + '">' + LL.relativeDate(t.due) + '</span>' : '') +
+        (t.time_spent ? '<span class="time-badge">' + t.time_spent + '</span>' : '') +
+        (t.blocked_by ? '<span class="dep-badge">blocked by ' + t.blocked_by + '</span>' : '') +
         '<span>Updated ' + LL.formatDate(t.updated || t.created) + '</span>' +
       '</div>' +
       (tags ? '<div class="task-tags">' + tags + '</div>' : '') +
       (hasBody ? '<div class="task-body">' + t.body + '</div>' : '') +
     '</div>';
   }).join('');
+}
+
+function renderKanban() {
+  var filtered = getFilteredTasks();
+  var columns = { todo: [], 'in-progress': [], done: [] };
+  filtered.forEach(function(t) {
+    var s = (t.status || 'todo').toLowerCase().replace(/\s+/g, '-');
+    if (columns[s]) columns[s].push(t);
+    else columns.todo.push(t);
+  });
+
+  ['todo', 'in-progress', 'done'].forEach(function(status) {
+    var container = document.getElementById('kanban-' + status);
+    var countEl = document.getElementById('kanban-' + (status === 'in-progress' ? 'ip' : status) + '-count');
+    if (countEl) countEl.textContent = columns[status].length;
+
+    container.innerHTML = columns[status].map(function(t) {
+      var dueClass = t.due && t.status !== 'done' ? LL.dueDateClass(t.due) : '';
+      var cardClass = 'kanban-card';
+      if (dueClass === 'overdue') cardClass += ' overdue';
+      else if (dueClass === 'due-soon') cardClass += ' due-soon';
+
+      return '<div class="' + cardClass + '" draggable="true" data-task-id="' + t.id + '">' +
+        '<div class="kc-title">' + (t.title || t.id) + '</div>' +
+        '<div class="kc-meta">' +
+          (t.priority ? '<span class="badge ' + LL.priorityBadgeClass(t.priority) + '">' + t.priority + '</span>' : '') +
+          (t.project ? '<span>' + t.project + '</span>' : '') +
+          (t.due && t.status !== 'done' ? '<span class="task-due ' + dueClass + '">' + LL.relativeDate(t.due) + '</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    // Drag events on cards
+    container.querySelectorAll('.kanban-card').forEach(function(card) {
+      card.addEventListener('dragstart', function(e) {
+        e.dataTransfer.setData('text/plain', card.dataset.taskId);
+        card.classList.add('dragging');
+      });
+      card.addEventListener('dragend', function() { card.classList.remove('dragging'); });
+    });
+
+    // Drop zone events
+    container.addEventListener('dragover', function(e) { e.preventDefault(); container.classList.add('drag-over'); });
+    container.addEventListener('dragleave', function() { container.classList.remove('drag-over'); });
+    container.addEventListener('drop', function(e) {
+      e.preventDefault();
+      container.classList.remove('drag-over');
+      var taskId = e.dataTransfer.getData('text/plain');
+      // Visual move only (actual update requires GitHub issue)
+      var task = allTasks.find(function(t) { return t.id === taskId; });
+      if (task) {
+        task.status = status;
+        applyFilters();
+      }
+    });
+  });
 }
 
 async function loadTasks() {
@@ -205,7 +285,6 @@ async function loadTasks() {
 
     document.getElementById('task-count').textContent = allTasks.length + ' task' + (allTasks.length !== 1 ? 's' : '');
 
-    // Build status filters
     var statuses = {};
     allTasks.forEach(function(t) {
       var s = (t.status || 'todo').toLowerCase().replace(/\s+/g, '-');
@@ -219,31 +298,23 @@ async function loadTasks() {
     });
     document.getElementById('status-filters').innerHTML = filtersHtml;
 
-    // Build project filter dropdown
     var projects = {};
     allTasks.forEach(function(t) { if (t.project) projects[t.project] = true; });
     var projSelect = document.getElementById('project-filter');
     Object.keys(projects).sort().forEach(function(p) {
-      var opt = document.createElement('option');
-      opt.value = p;
-      opt.textContent = p;
-      projSelect.appendChild(opt);
+      var opt = document.createElement('option'); opt.value = p; opt.textContent = p; projSelect.appendChild(opt);
     });
 
-    // Build tag filter dropdown
     var tags = {};
     allTasks.forEach(function(t) { (t.tags || []).forEach(function(tag) { tags[tag] = true; }); });
     var tagSelect = document.getElementById('tag-filter');
     Object.keys(tags).sort().forEach(function(tag) {
-      var opt = document.createElement('option');
-      opt.value = tag;
-      opt.textContent = tag;
-      tagSelect.appendChild(opt);
+      var opt = document.createElement('option'); opt.value = tag; opt.textContent = tag; tagSelect.appendChild(opt);
     });
 
     applyFilters();
   } catch (err) {
-    document.getElementById('tasks-list').innerHTML = '<div class="empty-state" style="color:#f85149">Failed to load data. Make sure data/index.json exists.</div>';
+    document.getElementById('tasks-list').innerHTML = '<div class="empty-state" style="color:var(--accent-red)">Failed to load data.</div>';
     console.error('Failed to load tasks:', err);
   }
 }
