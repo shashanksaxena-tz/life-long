@@ -2,7 +2,7 @@ name: Aggregate Data
 
 on:
   push:
-    branches: [main]
+    branches: [claude/design-github-system-RCORX]
     paths:
       - 'projects/**'
       - 'tasks/**'

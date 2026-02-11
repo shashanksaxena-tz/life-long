@@ -14,6 +14,8 @@ jobs:
     if: contains(github.event.issue.labels.*.name, 'input')
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: claude/design-github-system-RCORX
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -30,14 +32,14 @@ jobs:
       - name: Run aggregation
         run: python scripts/aggregate.py
 
-      - name: Commit and push to main
+      - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
           git diff --cached --quiet && echo "No changes" && exit 0
           git commit -m "feat: process issue #${{ github.event.issue.number }} - ${{ github.event.issue.title }}"
-          git push
+          git push origin claude/design-github-system-RCORX
 
       - name: Close issue
         env:
