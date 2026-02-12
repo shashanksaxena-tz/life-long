@@ -29,16 +29,16 @@
 /* --- Theme Variables --- */
 :root {
   /* Surfaces */
-  --bg-primary: #09090b;
-  --bg-secondary: #111113;
-  --bg-tertiary: #1a1a1e;
-  --bg-input: #111113;
-  --bg-hover: #1e1e22;
+  --bg-primary: #07070a;
+  --bg-secondary: #141418;
+  --bg-tertiary: #1e1e24;
+  --bg-input: #141418;
+  --bg-hover: #222228;
 
   /* Borders */
-  --border-primary: rgba(255, 255, 255, 0.08);
-  --border-secondary: rgba(255, 255, 255, 0.05);
-  --border-hover: rgba(255, 255, 255, 0.15);
+  --border-primary: rgba(255, 255, 255, 0.1);
+  --border-secondary: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.18);
 
   /* Text */
   --text-primary: #f0f0f3;
@@ -67,11 +67,11 @@
   --shadow-xl: 0 20px 48px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.25);
 
   /* Chart / misc */
-  --chart-grid: #1a1a1e;
+  --chart-grid: #1e1e24;
   --scrollbar-thumb: rgba(255, 255, 255, 0.1);
   --scrollbar-track: transparent;
   --kanban-drop: rgba(37, 99, 235, 0.06);
-  --heatmap-empty: #1a1a1e;
+  --heatmap-empty: #1e1e24;
   --heatmap-l1: #064e3b;
   --heatmap-l2: #047857;
   --heatmap-l3: #10b981;
@@ -80,16 +80,16 @@
 
 [data-theme="light"] {
   /* Surfaces */
-  --bg-primary: #fafafa;
+  --bg-primary: #f0f0f3;
   --bg-secondary: #ffffff;
-  --bg-tertiary: #f4f4f5;
+  --bg-tertiary: #f5f5f7;
   --bg-input: #ffffff;
-  --bg-hover: #f0f0f2;
+  --bg-hover: #ebebef;
 
   /* Borders */
-  --border-primary: rgba(0, 0, 0, 0.06);
-  --border-secondary: rgba(0, 0, 0, 0.04);
-  --border-hover: rgba(0, 0, 0, 0.12);
+  --border-primary: rgba(0, 0, 0, 0.1);
+  --border-secondary: rgba(0, 0, 0, 0.06);
+  --border-hover: rgba(0, 0, 0, 0.16);
 
   /* Text */
   --text-primary: #18181b;
@@ -138,6 +138,11 @@
 
 body {
   background: var(--bg-primary);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 50% at 90% 20%, rgba(147, 51, 234, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 40% at 50% 100%, rgba(34, 197, 94, 0.04) 0%, transparent 50%);
+  background-attachment: fixed;
   color: var(--text-secondary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   font-size: 0.925rem;
@@ -147,6 +152,14 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  min-height: 100vh;
+}
+
+[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(37, 99, 235, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 50% at 90% 20%, rgba(147, 51, 234, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 40% at 50% 100%, rgba(34, 197, 94, 0.04) 0%, transparent 50%);
 }
 
 a {
@@ -303,6 +316,7 @@ h2 {
   background: var(--bg-secondary);
   border-radius: 12px;
   padding: 1.5rem;
+  border: 1px solid var(--border-primary);
   border-top: 2px solid var(--accent-blue);
   box-shadow: var(--shadow-sm);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -706,6 +720,7 @@ h2 {
   background: var(--bg-secondary);
   border-radius: 12px;
   padding: 1.5rem;
+  border: 1px solid var(--border-primary);
   box-shadow: var(--shadow-sm);
 }
 
@@ -812,6 +827,7 @@ h2 {
   border-radius: 12px;
   padding: 1.15rem 1.5rem;
   margin-bottom: 0.75rem;
+  border: 1px solid var(--border-primary);
   box-shadow: var(--shadow-sm);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -893,6 +909,7 @@ h2 {
   border-radius: 12px;
   margin-bottom: 1rem;
   overflow: hidden;
+  border: 1px solid var(--border-primary);
   box-shadow: var(--shadow-sm);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1012,6 +1029,7 @@ h2 {
   border-radius: 12px;
   margin-bottom: 1.25rem;
   overflow: hidden;
+  border: 1px solid var(--border-primary);
   box-shadow: var(--shadow-sm);
 }
 
@@ -1246,6 +1264,7 @@ h2 {
   background: var(--bg-secondary);
   border-radius: 12px;
   padding: 1.5rem;
+  border: 1px solid var(--border-primary);
   box-shadow: var(--shadow-sm);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
@@ -1309,6 +1328,7 @@ h2 {
   background: var(--bg-secondary);
   border-radius: 12px;
   padding: 1.5rem;
+  border: 1px solid var(--border-primary);
   box-shadow: var(--shadow-sm);
 }
 
@@ -1784,6 +1804,7 @@ h2 {
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1rem;
+  border: 1px solid var(--border-primary);
   box-shadow: var(--shadow-sm);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1865,6 +1886,7 @@ h2 {
   background: var(--bg-secondary);
   border-radius: 12px;
   padding: 1.5rem;
+  border: 1px solid var(--border-primary);
   box-shadow: var(--shadow-sm);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -2117,6 +2139,144 @@ h2 {
 del {
   color: var(--text-muted);
   text-decoration-color: var(--text-muted);
+}
+
+/* --- Bounce Animation --- */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+  60% { transform: translateY(-3px); }
+}
+
+@keyframes bounceIn {
+  0% { opacity: 0; transform: scale(0.3); }
+  50% { transform: scale(1.05); }
+  70% { transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bounceScale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.ll-bounce:hover {
+  animation: bounce 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-action-btn:hover {
+  animation: bounceScale 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-btn:hover {
+  animation: bounceScale 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.badge {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.badge:hover {
+  transform: scale(1.08);
+}
+
+.tag:hover {
+  transform: scale(1.08);
+}
+
+/* --- Live Preview in Modals --- */
+.ll-preview-container {
+  display: flex;
+  gap: 1rem;
+  min-height: 200px;
+}
+
+.ll-preview-container .ll-textarea {
+  flex: 1;
+  min-height: 180px;
+  resize: vertical;
+}
+
+.ll-preview-pane {
+  flex: 1;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 10px;
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: 300px;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.ll-preview-pane:empty::before {
+  content: 'Preview will appear here...';
+  color: var(--text-placeholder);
+  font-style: italic;
+}
+
+.ll-preview-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+}
+
+@media (max-width: 768px) {
+  .ll-preview-container {
+    flex-direction: column;
+  }
+
+  .ll-preview-pane {
+    max-height: 200px;
+  }
+}
+
+/* --- Helper Guide Styles --- */
+.ll-field-help {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+  line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.ll-field-help::before {
+  content: 'i';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-blue-dim);
+  color: var(--accent-blue);
+  font-size: 0.6rem;
+  font-weight: 700;
+  font-style: italic;
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+}
+
+.ll-guide-banner {
+  background: var(--accent-blue-dim);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.ll-guide-banner strong {
+  color: var(--accent-blue);
+  font-weight: 600;
 }
 
 /* --- Stat Card Pulse on Load --- */

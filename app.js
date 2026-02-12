@@ -68,7 +68,7 @@
       '.ll-nav-btn-primary:hover{background:var(--accent-green-hover);box-shadow:0 4px 16px rgba(34,197,94,0.3)}',
       '.ll-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);animation:ll-overlayin 0.2s ease}',
       '@keyframes ll-overlayin{from{opacity:0}to{opacity:1}}',
-      '.ll-modal{background:var(--bg-secondary);border:1px solid var(--border-primary);border-radius:16px;width:90%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:ll-modalin 0.25s cubic-bezier(0.4,0,0.2,1)}',
+      '.ll-modal{background:var(--bg-secondary);border:1px solid var(--border-primary);border-radius:16px;width:90%;max-width:720px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:ll-modalin 0.25s cubic-bezier(0.4,0,0.2,1)}',
       '@keyframes ll-modalin{from{transform:scale(0.95) translateY(10px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}',
       '.ll-modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-primary);display:flex;justify-content:space-between;align-items:center}',
       '.ll-modal-header h2{color:var(--text-primary);font-size:1.1rem;margin:0;font-weight:600;letter-spacing:-0.02em}',
@@ -108,7 +108,7 @@
       '.ll-card-actions{display:flex;gap:0.35rem;margin-top:0.65rem;padding-top:0.65rem;border-top:1px solid var(--border-secondary);flex-wrap:wrap}',
       '.ll-card-btn{background:var(--bg-tertiary);color:var(--text-muted);border:none;padding:0.3rem 0.65rem;border-radius:8px;cursor:pointer;font-size:0.75rem;font-weight:500;transition:all 0.15s cubic-bezier(0.4,0,0.2,1);font-family:inherit;display:inline-flex;align-items:center;gap:0.3rem;white-space:nowrap}',
       '.ll-card-btn:hover{background:var(--accent-blue-dim);color:var(--accent-blue);transform:translateY(-1px)}',
-      '.ll-card-btn:active{transform:scale(0.95)}',
+      '.ll-card-btn:active{transform:scale(0.92)}',
       '.ll-card-btn.btn-done{color:var(--accent-green-text)}',
       '.ll-card-btn.btn-done:hover{background:rgba(34,197,94,0.15);color:var(--accent-green)}',
       '.ll-card-btn.btn-check{background:var(--accent-green);color:#fff;box-shadow:0 1px 4px rgba(34,197,94,0.2)}',
@@ -216,11 +216,45 @@
   }
 
   // =========================================
+  // LIVE PREVIEW HELPER
+  // =========================================
+
+  function attachLivePreview(container) {
+    var textareas = container.querySelectorAll('.ll-textarea[data-preview]');
+    textareas.forEach(function(ta) {
+      var previewId = ta.getAttribute('data-preview');
+      var previewPane = container.querySelector('#' + previewId);
+      if (!previewPane) return;
+      function updatePreview() {
+        var val = ta.value.trim();
+        if (val && typeof LL !== 'undefined' && LL.renderMarkdown) {
+          previewPane.innerHTML = LL.renderMarkdown(val);
+        } else {
+          previewPane.innerHTML = '';
+        }
+      }
+      ta.addEventListener('input', updatePreview);
+      updatePreview();
+    });
+  }
+
+  // =========================================
   // CREATE FORMS (new entities)
   // =========================================
 
   function renderProjectForm(c) {
-    c.innerHTML = '<div class="ll-form-group"><label>Project Name *</label><input class="ll-input" id="ll-f-name" placeholder="e.g. Analytics Engine"></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. frontend, data"></div><div class="ll-form-group"><label>Description (Markdown)</label><textarea class="ll-textarea" id="ll-f-desc" placeholder="## Description\nWhat is this project about?\n\n## Goals\n- Goal 1\n- Goal 2"></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Project</button></div>';
+    c.innerHTML =
+      '<div class="ll-guide-banner"><strong>Create a Project</strong> &mdash; Projects group related tasks together. Give it a name, add tags to categorize, and write a description that will show on the project card.</div>' +
+      '<div class="ll-form-group"><label>Project Name *</label><input class="ll-input" id="ll-f-name" placeholder="e.g. Analytics Engine"><div class="ll-field-help">This is the main title shown on the Projects page.</div></div>' +
+      '<div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. frontend, data"><div class="ll-field-help">Tags appear as colored chips for quick filtering.</div></div>' +
+      '<div class="ll-form-group"><label>Description (Markdown)</label>' +
+        '<div class="ll-preview-container">' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Write</div><textarea class="ll-textarea" id="ll-f-desc" data-preview="ll-p-desc" placeholder="## Description\nWhat is this project about?\n\n## Goals\n- Goal 1\n- Goal 2"></textarea></div>' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Preview</div><div class="ll-preview-pane" id="ll-p-desc"></div></div>' +
+        '</div>' +
+        '<div class="ll-field-help">Supports Markdown: **bold**, *italic*, `code`, lists, headings, and more.</div>' +
+      '</div>' +
+      '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Project</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var name = c.querySelector('#ll-f-name').value.trim(); if (!name) { showToast('Project name is required.', 'error'); return; }
@@ -229,13 +263,28 @@
       if (tags) body += '\n\n### Tags\n\n' + tags; if (desc) body += '\n\n### Description\n\n' + desc;
       submitForm(this, 'Create Project', title, body, 'Project');
     });
+    attachLivePreview(c);
     c.querySelector('#ll-f-name').focus();
   }
 
   function renderTaskForm(c, data) {
     var opts = '<option value="">Select a project...</option>';
     if (data && data.projects) data.projects.forEach(function(p) { opts += '<option value="' + escapeHtml(p.id) + '">' + escapeHtml(p.name || p.id) + '</option>'; });
-    c.innerHTML = '<div class="ll-form-group"><label>Task Title *</label><input class="ll-input" id="ll-f-title" placeholder="e.g. Fix OAuth redirect bug"></div><div class="ll-form-group"><label>Project *</label><select class="ll-select" id="ll-f-project">' + opts + '</select></div><div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Priority</label><select class="ll-select" id="ll-f-priority"><option value="">None</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option></select></div><div class="ll-form-group" style="flex:1"><label>Due Date</label><input type="date" class="ll-input" id="ll-f-due"></div></div><div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Blocked By</label><div class="ll-hint">Task ID that blocks this</div><input class="ll-input" id="ll-f-blocked" placeholder="e.g. task-2026-003"></div><div class="ll-form-group" style="flex:1"><label>Time Spent</label><input class="ll-input" id="ll-f-time" placeholder="e.g. 2h, 30m"></div></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. bug, backend"></div><div class="ll-form-group"><label>Description (Markdown)</label><textarea class="ll-textarea" id="ll-f-desc" placeholder="## What needs to be done?\n\n- [ ] Step 1\n- [ ] Step 2"></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Task</button></div>';
+    c.innerHTML =
+      '<div class="ll-guide-banner"><strong>Create a Task</strong> &mdash; Tasks are the work items that belong to a project. Set priority and due dates to see them highlighted on the Tasks page. Use Markdown in the description for checklists.</div>' +
+      '<div class="ll-form-group"><label>Task Title *</label><input class="ll-input" id="ll-f-title" placeholder="e.g. Fix OAuth redirect bug"><div class="ll-field-help">Shown as the task card heading on the Tasks page.</div></div>' +
+      '<div class="ll-form-group"><label>Project *</label><select class="ll-select" id="ll-f-project">' + opts + '</select><div class="ll-field-help">Tasks are grouped under projects on the Dashboard.</div></div>' +
+      '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Priority</label><select class="ll-select" id="ll-f-priority"><option value="">None</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option></select><div class="ll-field-help">Displayed as a colored badge on the card.</div></div><div class="ll-form-group" style="flex:1"><label>Due Date</label><input type="date" class="ll-input" id="ll-f-due"><div class="ll-field-help">Overdue tasks show a red indicator.</div></div></div>' +
+      '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Blocked By</label><div class="ll-hint">Task ID that blocks this</div><input class="ll-input" id="ll-f-blocked" placeholder="e.g. task-2026-003"><div class="ll-field-help">Creates a dependency link in the graph.</div></div><div class="ll-form-group" style="flex:1"><label>Time Spent</label><input class="ll-input" id="ll-f-time" placeholder="e.g. 2h, 30m"><div class="ll-field-help">Tracked per-project on the Projects page.</div></div></div>' +
+      '<div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. bug, backend"></div>' +
+      '<div class="ll-form-group"><label>Description (Markdown)</label>' +
+        '<div class="ll-preview-container">' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Write</div><textarea class="ll-textarea" id="ll-f-desc" data-preview="ll-p-desc" placeholder="## What needs to be done?\n\n- [ ] Step 1\n- [ ] Step 2"></textarea></div>' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Preview</div><div class="ll-preview-pane" id="ll-p-desc"></div></div>' +
+        '</div>' +
+        '<div class="ll-field-help">Use - [ ] for checklists, **bold** for emphasis, ` ` for code.</div>' +
+      '</div>' +
+      '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Task</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var taskTitle = c.querySelector('#ll-f-title').value.trim(), project = c.querySelector('#ll-f-project').value;
@@ -248,11 +297,21 @@
       if (tags) body += '\n\n### Tags\n\n' + tags; if (desc) body += '\n\n### Description\n\n' + desc;
       submitForm(this, 'Create Task', title, body, 'Task');
     });
+    attachLivePreview(c);
     c.querySelector('#ll-f-title').focus();
   }
 
   function renderLogForm(c) {
-    c.innerHTML = '<div class="ll-form-group"><label>Log Entry (Markdown) *</label><textarea class="ll-textarea" id="ll-f-body" style="min-height:180px" placeholder="## Daily Log\n\n### What I did today\n- Worked on...\n- Fixed...\n\n### Blockers\n- None\n\n### Notes\n> Some insight"></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Add Log Entry</button></div>';
+    c.innerHTML =
+      '<div class="ll-guide-banner"><strong>Add a Log Entry</strong> &mdash; Daily logs are shown chronologically on the Logs page. Use Markdown headings to structure your day, lists for accomplishments, and blockquotes for insights.</div>' +
+      '<div class="ll-form-group"><label>Log Entry (Markdown) *</label>' +
+        '<div class="ll-preview-container">' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Write</div><textarea class="ll-textarea" id="ll-f-body" data-preview="ll-p-body" style="min-height:180px" placeholder="## Daily Log\n\n### What I did today\n- Worked on...\n- Fixed...\n\n### Blockers\n- None\n\n### Notes\n> Some insight"></textarea></div>' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Preview</div><div class="ll-preview-pane log-body" id="ll-p-body"></div></div>' +
+        '</div>' +
+        '<div class="ll-field-help">This content renders as the log card body on the Logs page.</div>' +
+      '</div>' +
+      '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Add Log Entry</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var body = c.querySelector('#ll-f-body').value.trim(); if (!body) { showToast('Log body is required.', 'error'); return; }
@@ -260,11 +319,22 @@
       summary = summary.replace(/^#+\s*/, '').substring(0, 60);
       submitForm(this, 'Add Log Entry', 'Add Log: ' + summary, '### Summary\n\n' + body, 'Log entry');
     });
+    attachLivePreview(c);
     c.querySelector('#ll-f-body').focus();
   }
 
   function renderIdeaForm(c) {
-    c.innerHTML = '<div class="ll-form-group"><label>Idea (Markdown) *</label><textarea class="ll-textarea" id="ll-f-idea" style="min-height:150px" placeholder="## My Idea\n\nDescribe your idea in detail...\n\n### Technical Approach\n- Step 1\n- Step 2"></textarea></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. product, automation"></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Add Idea</button></div>';
+    c.innerHTML =
+      '<div class="ll-guide-banner"><strong>Capture an Idea</strong> &mdash; Ideas appear as cards in a grid on the Ideas page. Use Markdown to flesh out the concept. Add tags to categorize and filter later.</div>' +
+      '<div class="ll-form-group"><label>Idea (Markdown) *</label>' +
+        '<div class="ll-preview-container">' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Write</div><textarea class="ll-textarea" id="ll-f-idea" data-preview="ll-p-idea" style="min-height:150px" placeholder="## My Idea\n\nDescribe your idea in detail...\n\n### Technical Approach\n- Step 1\n- Step 2"></textarea></div>' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Preview</div><div class="ll-preview-pane idea-body" id="ll-p-idea"></div></div>' +
+        '</div>' +
+        '<div class="ll-field-help">The first line becomes the card title. Rich Markdown renders on the idea card.</div>' +
+      '</div>' +
+      '<div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. product, automation"><div class="ll-field-help">Filterable tags displayed in the card footer.</div></div>' +
+      '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Add Idea</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var idea = c.querySelector('#ll-f-idea').value.trim(); if (!idea) { showToast('Idea text is required.', 'error'); return; }
@@ -274,11 +344,25 @@
       var body = '### Idea\n\n' + idea; if (tags) body += '\n\n### Tags\n\n' + tags;
       submitForm(this, 'Add Idea', 'Add Idea: ' + shortTitle, body, 'Idea');
     });
+    attachLivePreview(c);
     c.querySelector('#ll-f-idea').focus();
   }
 
   function renderGoalForm(c) {
-    c.innerHTML = '<div class="ll-form-group"><label>Goal Title *</label><input class="ll-input" id="ll-f-title" placeholder="e.g. Ship Auth Service by March"></div><div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Target Date</label><input type="date" class="ll-input" id="ll-f-target"></div></div><div class="ll-form-group"><label>Linked Tasks</label><div class="ll-hint">Comma-separated task IDs (e.g. task-2026-001, task-2026-002)</div><input class="ll-input" id="ll-f-tasks" placeholder="e.g. task-2026-001, task-2026-002"></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. backend, Q1"></div><div class="ll-form-group"><label>Description (Markdown)</label><textarea class="ll-textarea" id="ll-f-desc" placeholder="## Objective\nWhat does this goal entail?\n\n## Key Results\n1. Result 1\n2. Result 2"></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Goal</button></div>';
+    c.innerHTML =
+      '<div class="ll-guide-banner"><strong>Set a Goal</strong> &mdash; Goals track your high-level objectives. Link tasks to see progress automatically. Set target dates to get countdown reminders on the Goals page.</div>' +
+      '<div class="ll-form-group"><label>Goal Title *</label><input class="ll-input" id="ll-f-title" placeholder="e.g. Ship Auth Service by March"><div class="ll-field-help">Shown as the goal card heading.</div></div>' +
+      '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Target Date</label><input type="date" class="ll-input" id="ll-f-target"><div class="ll-field-help">Countdown shown on the goal card.</div></div></div>' +
+      '<div class="ll-form-group"><label>Linked Tasks</label><div class="ll-hint">Comma-separated task IDs (e.g. task-2026-001, task-2026-002)</div><input class="ll-input" id="ll-f-tasks" placeholder="e.g. task-2026-001, task-2026-002"><div class="ll-field-help">Progress bar auto-updates as linked tasks are completed.</div></div>' +
+      '<div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. backend, Q1"></div>' +
+      '<div class="ll-form-group"><label>Description (Markdown)</label>' +
+        '<div class="ll-preview-container">' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Write</div><textarea class="ll-textarea" id="ll-f-desc" data-preview="ll-p-desc" placeholder="## Objective\nWhat does this goal entail?\n\n## Key Results\n1. Result 1\n2. Result 2"></textarea></div>' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Preview</div><div class="ll-preview-pane goal-body" id="ll-p-desc" style="display:block"></div></div>' +
+        '</div>' +
+        '<div class="ll-field-help">Click the goal card to expand and see this description.</div>' +
+      '</div>' +
+      '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Goal</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var title = c.querySelector('#ll-f-title').value.trim(); if (!title) { showToast('Goal title is required.', 'error'); return; }
@@ -290,11 +374,17 @@
       if (desc) body += '\n\n### Description\n\n' + desc;
       submitForm(this, 'Create Goal', issueTitle, body, 'Goal');
     });
+    attachLivePreview(c);
     c.querySelector('#ll-f-title').focus();
   }
 
   function renderHabitForm(c) {
-    c.innerHTML = '<div class="ll-form-group"><label>Habit Name *</label><input class="ll-input" id="ll-f-name" placeholder="e.g. Daily standup notes"></div><div class="ll-form-group"><label>Frequency</label><select class="ll-select" id="ll-f-freq"><option value="daily">Daily</option><option value="weekly">Weekly</option></select></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. productivity, health"></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Habit</button></div>';
+    c.innerHTML =
+      '<div class="ll-guide-banner"><strong>Track a Habit</strong> &mdash; Habits show a 30-day check-in grid and streak counter on the Habits page. Use the "Check In Today" button on each habit card to log daily completion.</div>' +
+      '<div class="ll-form-group"><label>Habit Name *</label><input class="ll-input" id="ll-f-name" placeholder="e.g. Daily standup notes"><div class="ll-field-help">Displayed as the habit card title.</div></div>' +
+      '<div class="ll-form-group"><label>Frequency</label><select class="ll-select" id="ll-f-freq"><option value="daily">Daily</option><option value="weekly">Weekly</option></select><div class="ll-field-help">Daily habits track day-by-day streaks; weekly tracks per-week.</div></div>' +
+      '<div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. productivity, health"><div class="ll-field-help">Filter habits by tags on the Habits page.</div></div>' +
+      '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Habit</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var name = c.querySelector('#ll-f-name').value.trim(); if (!name) { showToast('Habit name is required.', 'error'); return; }
@@ -309,7 +399,13 @@
   function renderUpdateForm(c, data) {
     var opts = '<option value="">Select a task...</option>';
     if (data && data.tasks) data.tasks.forEach(function(t) { opts += '<option value="' + escapeHtml(t.id) + '">' + escapeHtml(t.id + ': ' + (t.title || '') + ' [' + (t.status || 'todo') + ']') + '</option>'; });
-    c.innerHTML = '<div class="ll-form-group"><label>Task *</label><select class="ll-select" id="ll-f-taskid">' + opts + '</select></div><div class="ll-form-group"><label>New Status *</label><select class="ll-select" id="ll-f-status"><option value="">Select status...</option><option value="todo">Todo</option><option value="in-progress">In Progress</option><option value="done">Done</option></select></div><div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Time Spent</label><input class="ll-input" id="ll-f-time" placeholder="e.g. 2h"></div><div class="ll-form-group" style="flex:1"><label>Blocked By</label><input class="ll-input" id="ll-f-blocked" placeholder="e.g. task-2026-003"></div></div><div class="ll-form-group"><label>Comment</label><textarea class="ll-textarea" id="ll-f-comment" placeholder="Any notes about this update..."></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Update Task</button></div>';
+    c.innerHTML =
+      '<div class="ll-guide-banner"><strong>Quick Update</strong> &mdash; Change a task\'s status, log time, or add a comment. Tip: You can also use the inline buttons on task cards for one-click status changes.</div>' +
+      '<div class="ll-form-group"><label>Task *</label><select class="ll-select" id="ll-f-taskid">' + opts + '</select><div class="ll-field-help">Select the task you want to update.</div></div>' +
+      '<div class="ll-form-group"><label>New Status *</label><select class="ll-select" id="ll-f-status"><option value="">Select status...</option><option value="todo">Todo</option><option value="in-progress">In Progress</option><option value="done">Done</option></select></div>' +
+      '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Time Spent</label><input class="ll-input" id="ll-f-time" placeholder="e.g. 2h"><div class="ll-field-help">Adds to project time total.</div></div><div class="ll-form-group" style="flex:1"><label>Blocked By</label><input class="ll-input" id="ll-f-blocked" placeholder="e.g. task-2026-003"></div></div>' +
+      '<div class="ll-form-group"><label>Comment</label><textarea class="ll-textarea" id="ll-f-comment" placeholder="Any notes about this update..."></textarea></div>' +
+      '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Update Task</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var taskId = c.querySelector('#ll-f-taskid').value, status = c.querySelector('#ll-f-status').value;
@@ -341,13 +437,20 @@
     }).join('');
 
     c.innerHTML =
+      '<div class="ll-guide-banner"><strong>Editing:</strong> ' + escapeHtml(task.title || task.id) + ' &mdash; Changes create a GitHub issue that updates the data on next deploy.</div>' +
       '<div class="ll-form-group"><label>Task: ' + escapeHtml(task.title || task.id) + '</label><div class="ll-hint">ID: ' + escapeHtml(task.id) + '</div></div>' +
-      '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Status *</label><select class="ll-select" id="ll-f-status">' + statusOptions + '</select></div><div class="ll-form-group" style="flex:1"><label>Priority</label><select class="ll-select" id="ll-f-priority">' + priorityOptions + '</select></div></div>' +
+      '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Status *</label><select class="ll-select" id="ll-f-status">' + statusOptions + '</select><div class="ll-field-help">Changes the status badge on the card.</div></div><div class="ll-form-group" style="flex:1"><label>Priority</label><select class="ll-select" id="ll-f-priority">' + priorityOptions + '</select></div></div>' +
       '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Due Date</label><input type="date" class="ll-input" id="ll-f-due" value="' + escapeHtml(task.due || '') + '"></div><div class="ll-form-group" style="flex:1"><label>Time Spent</label><input class="ll-input" id="ll-f-time" value="' + escapeHtml(task.time_spent || '') + '" placeholder="e.g. 4h"></div></div>' +
       '<div class="ll-form-group"><label>Blocked By</label><div class="ll-hint">Task ID that blocks this task</div><input class="ll-input" id="ll-f-blocked" value="' + escapeHtml(task.blocked_by || '') + '" placeholder="e.g. task-2026-003"></div>' +
-      '<div class="ll-form-group"><label>Description (Markdown)</label><textarea class="ll-textarea" id="ll-f-desc" style="min-height:150px">' + escapeHtml(task.body || '') + '</textarea></div>' +
+      '<div class="ll-form-group"><label>Description (Markdown)</label>' +
+        '<div class="ll-preview-container">' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Write</div><textarea class="ll-textarea" id="ll-f-desc" data-preview="ll-p-desc" style="min-height:150px">' + escapeHtml(task.body || '') + '</textarea></div>' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Preview</div><div class="ll-preview-pane task-body" id="ll-p-desc" style="display:block"></div></div>' +
+        '</div>' +
+      '</div>' +
       '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Save Changes</button></div>';
 
+    attachLivePreview(c);
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var status = c.querySelector('#ll-f-status').value;
@@ -378,12 +481,19 @@
     }).join('');
 
     c.innerHTML =
+      '<div class="ll-guide-banner"><strong>Editing:</strong> ' + escapeHtml(project.name || project.id) + '</div>' +
       '<div class="ll-form-group"><label>Project: ' + escapeHtml(project.name || project.id) + '</label></div>' +
       '<div class="ll-form-group"><label>Status</label><select class="ll-select" id="ll-f-status">' + statusOptions + '</select></div>' +
       '<div class="ll-form-group"><label>Tags</label><input class="ll-input" id="ll-f-tags" value="' + escapeHtml((project.tags || []).join(', ')) + '"></div>' +
-      '<div class="ll-form-group"><label>Description (Markdown)</label><textarea class="ll-textarea" id="ll-f-desc" style="min-height:180px">' + escapeHtml(project.body || '') + '</textarea></div>' +
+      '<div class="ll-form-group"><label>Description (Markdown)</label>' +
+        '<div class="ll-preview-container">' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Write</div><textarea class="ll-textarea" id="ll-f-desc" data-preview="ll-p-desc" style="min-height:180px">' + escapeHtml(project.body || '') + '</textarea></div>' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Preview</div><div class="ll-preview-pane project-body-content" id="ll-p-desc"></div></div>' +
+        '</div>' +
+      '</div>' +
       '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Save Changes</button></div>';
 
+    attachLivePreview(c);
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var status = c.querySelector('#ll-f-status').value;
@@ -407,11 +517,18 @@
     }).join('');
 
     c.innerHTML =
+      '<div class="ll-guide-banner"><strong>Edit Idea</strong> &mdash; Update the status as you refine this idea from raw to planning.</div>' +
       '<div class="ll-form-group"><label>Status</label><select class="ll-select" id="ll-f-status">' + statusOptions + '</select></div>' +
       '<div class="ll-form-group"><label>Tags</label><input class="ll-input" id="ll-f-tags" value="' + escapeHtml((idea.tags || []).join(', ')) + '"></div>' +
-      '<div class="ll-form-group"><label>Idea Body (Markdown)</label><textarea class="ll-textarea" id="ll-f-body" style="min-height:200px">' + escapeHtml(idea.body || '') + '</textarea></div>' +
+      '<div class="ll-form-group"><label>Idea Body (Markdown)</label>' +
+        '<div class="ll-preview-container">' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Write</div><textarea class="ll-textarea" id="ll-f-body" data-preview="ll-p-body" style="min-height:200px">' + escapeHtml(idea.body || '') + '</textarea></div>' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Preview</div><div class="ll-preview-pane idea-body" id="ll-p-body"></div></div>' +
+        '</div>' +
+      '</div>' +
       '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Save Changes</button></div>';
 
+    attachLivePreview(c);
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var status = c.querySelector('#ll-f-status').value;
@@ -436,13 +553,20 @@
     }).join('');
 
     c.innerHTML =
+      '<div class="ll-guide-banner"><strong>Editing:</strong> ' + escapeHtml(goal.title || goal.id) + '</div>' +
       '<div class="ll-form-group"><label>Goal: ' + escapeHtml(goal.title || goal.id) + '</label></div>' +
       '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Status</label><select class="ll-select" id="ll-f-status">' + statusOptions + '</select></div><div class="ll-form-group" style="flex:1"><label>Target Date</label><input type="date" class="ll-input" id="ll-f-target" value="' + escapeHtml(goal.target_date || '') + '"></div></div>' +
-      '<div class="ll-form-group"><label>Linked Tasks</label><input class="ll-input" id="ll-f-tasks" value="' + escapeHtml((goal.linked_tasks || []).join(', ')) + '"></div>' +
+      '<div class="ll-form-group"><label>Linked Tasks</label><input class="ll-input" id="ll-f-tasks" value="' + escapeHtml((goal.linked_tasks || []).join(', ')) + '"><div class="ll-field-help">Progress bar auto-calculates from linked task completion.</div></div>' +
       '<div class="ll-form-group"><label>Tags</label><input class="ll-input" id="ll-f-tags" value="' + escapeHtml((goal.tags || []).join(', ')) + '"></div>' +
-      '<div class="ll-form-group"><label>Description (Markdown)</label><textarea class="ll-textarea" id="ll-f-desc" style="min-height:150px">' + escapeHtml(goal.body || '') + '</textarea></div>' +
+      '<div class="ll-form-group"><label>Description (Markdown)</label>' +
+        '<div class="ll-preview-container">' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Write</div><textarea class="ll-textarea" id="ll-f-desc" data-preview="ll-p-desc" style="min-height:150px">' + escapeHtml(goal.body || '') + '</textarea></div>' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Preview</div><div class="ll-preview-pane goal-body" id="ll-p-desc" style="display:block"></div></div>' +
+        '</div>' +
+      '</div>' +
       '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Save Changes</button></div>';
 
+    attachLivePreview(c);
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var status = c.querySelector('#ll-f-status').value;
@@ -473,8 +597,9 @@
     }).join('');
 
     c.innerHTML =
+      '<div class="ll-guide-banner"><strong>Editing:</strong> ' + escapeHtml(habit.name || habit.id) + ' &mdash; Set to "paused" to temporarily stop tracking streaks.</div>' +
       '<div class="ll-form-group"><label>Habit: ' + escapeHtml(habit.name || habit.id) + '</label></div>' +
-      '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Frequency</label><select class="ll-select" id="ll-f-freq">' + freqOptions + '</select></div><div class="ll-form-group" style="flex:1"><label>Status</label><select class="ll-select" id="ll-f-status">' + statusOptions + '</select></div></div>' +
+      '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Frequency</label><select class="ll-select" id="ll-f-freq">' + freqOptions + '</select><div class="ll-field-help">Affects how streaks are calculated.</div></div><div class="ll-form-group" style="flex:1"><label>Status</label><select class="ll-select" id="ll-f-status">' + statusOptions + '</select></div></div>' +
       '<div class="ll-form-group"><label>Tags</label><input class="ll-input" id="ll-f-tags" value="' + escapeHtml((habit.tags || []).join(', ')) + '"></div>' +
       '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Save Changes</button></div>';
 
@@ -716,7 +841,7 @@
     var s = document.createElement('style');
     s.id = 'll-scroll-styles';
     s.textContent = [
-      '.ll-scroll-animate{opacity:0;transform:translateY(16px);transition:opacity 0.4s cubic-bezier(0.4,0,0.2,1),transform 0.4s cubic-bezier(0.4,0,0.2,1)}',
+      '.ll-scroll-animate{opacity:0;transform:translateY(20px);transition:opacity 0.5s cubic-bezier(0.4,0,0.2,1),transform 0.5s cubic-bezier(0.4,0,0.2,1)}',
       '.ll-scroll-animate.ll-visible{opacity:1;transform:translateY(0)}'
     ].join('\n');
     document.head.appendChild(s);
