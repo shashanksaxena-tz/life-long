@@ -196,6 +196,9 @@ function renderProjects(filter) {
     var progressHtml = LL.progressBarHTML(counts.done, counts.total);
     var trend = LL.weeklyCompletionTrend(allTasks.filter(function(t) { return t.project === p.id; }));
     var sparkHtml = LL.sparklineSVG(trend, 60, 16);
+    var projectTimeTotalHrs = 0;
+    getProjectTasks(p.id).forEach(function(t) { projectTimeTotalHrs += parseTimeSpent(t.time_spent); });
+    var timeHtml = projectTimeTotalHrs > 0 ? '<span class="time-badge">' + projectTimeTotalHrs + 'h invested</span>' : '';
 
     var canvasId = 'burndown-' + p.id;
     var timelineHtml = buildProjectTimelineHTML(p.id);
@@ -207,6 +210,7 @@ function renderProjects(filter) {
           '<div class="project-meta">' +
             '<span class="badge ' + LL.badgeClass(p.status) + '">' + (p.status || 'unknown') + '</span>' +
             '<span class="project-task-count">' + taskInfo + '</span>' +
+            timeHtml +
             (sparkHtml ? '<span>' + sparkHtml + '</span>' : '') +
             '<span>Created ' + LL.formatDate(p.created) + '</span>' +
           '</div>' +
