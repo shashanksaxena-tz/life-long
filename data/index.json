@@ -1,18 +1,18 @@
 {
-  "generated_at": "2026-02-12T05:24:15.436821",
+  "generated_at": "2026-02-12T05:28:14.715996",
   "stats": {
     "total_projects": 7,
     "active_projects": 5,
-    "total_tasks": 18,
+    "total_tasks": 19,
     "done_tasks": 7,
     "in_progress_tasks": 6,
-    "todo_tasks": 5,
+    "todo_tasks": 6,
     "overdue_tasks": 0,
     "due_soon_tasks": 0,
     "priority_counts": {
       "critical": 1,
       "high": 6,
-      "medium": 9,
+      "medium": 10,
       "low": 2
     },
     "total_ideas": 6,
@@ -31,6 +31,7 @@
       "Mobile",
       "Q1",
       "Q2",
+      "Revamp",
       "ai",
       "api",
       "architecture",
@@ -434,6 +435,22 @@
       "priority": "medium",
       "time_spent": "3h",
       "body": "## Widget Sizes\n- **Small** (2x2): Shows next due task + quick capture button\n- **Medium** (4x2): Today's tasks list (up to 4 items)\n- **Large** (4x4): Tasks + progress ring + streak counter\n\n## Design Principles\n- Matches system appearance (light/dark)\n- Tap anywhere to open full app\n- Long press for quick actions"
+    },
+    {
+      "id": "task-2026-019",
+      "project": "civi",
+      "title": "Revamp AO Portal",
+      "status": "todo",
+      "created": "2026-02-12",
+      "updated": "2026-02-12",
+      "tags": [
+        "Revamp",
+        "Frontend",
+        "Backend"
+      ],
+      "priority": "medium",
+      "due": "2026-02-16",
+      "body": "## Description\n## Revamp \n\n - [ ] UI revamp\n- [ ] BE revamp\n- [ ] AI revamp\n- [ ] DB revamp\n\n## Logs\n- 2026-02-12: Created from issue #4."
     }
   ],
   "logs": [
