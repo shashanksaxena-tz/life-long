@@ -249,7 +249,7 @@
       '<div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. frontend, data"><div class="ll-field-help">Tags appear as colored chips for quick filtering.</div></div>' +
       '<div class="ll-form-group"><label>Description (Markdown)</label>' +
         '<div class="ll-preview-container">' +
-          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Write</div><textarea class="ll-textarea" id="ll-f-desc" data-preview="ll-p-desc" placeholder="## Description\nWhat is this project about?\n\n## Goals\n- Goal 1\n- Goal 2"></textarea></div>' +
+          '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Write</div><textarea class="ll-textarea" id="ll-f-desc" data-preview="ll-p-desc" placeholder="What is this project about?\n\n## Goals\n- Goal 1\n- Goal 2"></textarea></div>' +
           '<div style="flex:1;display:flex;flex-direction:column"><div class="ll-preview-label">Preview</div><div class="ll-preview-pane" id="ll-p-desc"></div></div>' +
         '</div>' +
         '<div class="ll-field-help">Supports Markdown: **bold**, *italic*, `code`, lists, headings, and more.</div>' +
