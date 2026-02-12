@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-02-12T05:21:49.325631",
+  "generated_at": "2026-02-12T05:24:15.436821",
   "stats": {
-    "total_projects": 6,
-    "active_projects": 4,
+    "total_projects": 7,
+    "active_projects": 5,
     "total_tasks": 18,
     "done_tasks": 7,
     "in_progress_tasks": 6,
@@ -28,6 +28,7 @@
       "Backend",
       "Data",
       "Frontend",
+      "Mobile",
       "Q1",
       "Q2",
       "ai",
@@ -84,6 +85,19 @@
         "api"
       ],
       "body": "## Description\nUnified API gateway handling routing, rate limiting, authentication, and request transformation.\n\n## Completed Features\n- Path-based routing to microservices\n- JWT validation middleware\n- Request/response transformation\n- Rate limiting with sliding window\n- Health checks and circuit breaker\n- OpenAPI documentation aggregation\n\n## Metrics\n- Average latency: 12ms (p99: 45ms)\n- Uptime: 99.97% over last 90 days"
+    },
+    {
+      "id": "asg",
+      "name": "ASG",
+      "status": "active",
+      "created": "2026-02-12",
+      "tags": [
+        "Frontend",
+        "Data",
+        "Mobile",
+        "AI"
+      ],
+      "body": "## Description\n## Description\n\n## Stats\n- Total tasks: 0\n- Completed: 0"
     },
     {
       "id": "auth-service",
