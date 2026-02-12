@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-12T05:28:14.715996",
+  "generated_at": "2026-02-12T05:37:24.398352",
   "stats": {
     "total_projects": 7,
     "active_projects": 5,
@@ -98,7 +98,7 @@
         "Mobile",
         "AI"
       ],
-      "body": "## Description\n## Description\n\n## Stats\n- Total tasks: 0\n- Completed: 0"
+      "body": "## Description\nASG project.\n\n## Stats\n- Total tasks: 0\n- Completed: 0"
     },
     {
       "id": "auth-service",
@@ -123,7 +123,7 @@
         "AI",
         "Data"
       ],
-      "body": "## Description\n## Description\n\n## Stats\n- Total tasks: 0\n- Completed: 0"
+      "body": "## Description\nCivi project.\n\n## Stats\n- Total tasks: 0\n- Completed: 0"
     },
     {
       "id": "design-system",

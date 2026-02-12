@@ -188,6 +188,35 @@ If you cannot determine the action, return {{"action": "unknown"}}."""
     return None
 
 
+def append_to_daily_log(action_summary: str):
+    """Automatically add an entry to today's log for any system action."""
+    log_dir = REPO_ROOT / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    filepath = log_dir / f"{today}.md"
+
+    entry_line = f"- {action_summary} (via issue #{issue_number})"
+
+    if filepath.exists():
+        existing = filepath.read_text(encoding="utf-8")
+        if "## Activity" in existing:
+            existing = existing.rstrip() + f"\n{entry_line}\n"
+        else:
+            existing = existing.rstrip() + f"\n\n## Activity\n{entry_line}\n"
+        filepath.write_text(existing, encoding="utf-8")
+    else:
+        content = f"""---
+date: {today}
+---
+
+## Daily Log
+
+## Activity
+{entry_line}
+"""
+        filepath.write_text(content, encoding="utf-8")
+    print(f"Logged activity: {action_summary}")
+
+
 def create_project(name: str):
     fields = parse_body_fields(body)
     # Issue form may provide the name in the body instead of the title
@@ -198,6 +227,15 @@ def create_project(name: str):
     tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
     tag_str = f"[{', '.join(tag_list)}]" if tag_list else "[]"
 
+    # Get description - strip leading markdown headers if they duplicate our template
+    desc = fields.get("description", "").strip()
+    if not desc:
+        desc = f"{name} project."
+    # Remove leading "## Description" if the user included it
+    desc = re.sub(r"^##\s*Description\s*\n*", "", desc, flags=re.IGNORECASE).strip()
+    if not desc:
+        desc = f"{name} project."
+
     content = f"""---
 id: {slug}
 name: {name}
@@ -207,14 +245,11 @@ tags: {tag_str}
 ---
 
 ## Description
-{fields.get('description', name)}
-
-## Stats
-- Total tasks: 0
-- Completed: 0
+{desc}
 """
     filepath.write_text(content, encoding="utf-8")
     print(f"Created project: {filepath}")
+    append_to_daily_log(f"Created project **{name}** with tags: {', '.join(tag_list) if tag_list else 'none'}")
 
 
 def create_task(task_title: str, ai_fields: dict | None = None):
@@ -226,6 +261,11 @@ def create_task(task_title: str, ai_fields: dict | None = None):
     tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
     tag_str = f"[{', '.join(tag_list)}]" if tag_list else "[]"
     description = fields.get("description", task_title)
+
+    # Strip duplicate "## Description" header from user input
+    description = re.sub(r"^##\s*Description\s*\n*", "", description, flags=re.IGNORECASE).strip()
+    if not description:
+        description = task_title
 
     # Priority and due date support
     priority = fields.get("priority", "")
@@ -272,6 +312,7 @@ def create_task(task_title: str, ai_fields: dict | None = None):
 """
     filepath.write_text(content, encoding="utf-8")
     print(f"Created task: {filepath}")
+    append_to_daily_log(f"Created task **{task_title}** in project {project}")
 
 
 def add_log(summary: str):
@@ -299,6 +340,7 @@ date: {today}
 """
         filepath.write_text(content, encoding="utf-8")
     print(f"Updated log: {filepath}")
+    append_to_daily_log(f"Added log entry: {summary}")
 
 
 def add_idea(idea_text: str):
@@ -322,6 +364,7 @@ tags: {tag_str}
 """
     filepath.write_text(content, encoding="utf-8")
     print(f"Created idea: {filepath}")
+    append_to_daily_log(f"Added idea: {idea_text[:60]}{'...' if len(idea_text) > 60 else ''}")
 
 
 def update_task(task_id: str, new_status: str):
@@ -343,6 +386,7 @@ def update_task(task_id: str, new_status: str):
 
     filepath.write_text(text, encoding="utf-8")
     print(f"Updated task: {filepath}")
+    append_to_daily_log(f"Updated task **{task_id}** status to {new_status}")
 
 
 def create_goal(goal_title: str):
@@ -352,6 +396,11 @@ def create_goal(goal_title: str):
     linked_tasks = fields.get("linked tasks", fields.get("linked_tasks", ""))
     tags = fields.get("tags", "")
     description = fields.get("description", goal_title)
+
+    # Strip duplicate description header
+    description = re.sub(r"^##\s*Description\s*\n*", "", description, flags=re.IGNORECASE).strip()
+    if not description:
+        description = goal_title
 
     tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
     tag_str = f"[{', '.join(tag_list)}]" if tag_list else "[]"
@@ -380,6 +429,7 @@ created: {today}
 """
     filepath.write_text(content, encoding="utf-8")
     print(f"Created goal: {filepath}")
+    append_to_daily_log(f"Created goal **{goal_title}**")
 
 
 def create_habit(habit_name: str):
@@ -411,6 +461,7 @@ created: {today}
 """
     filepath.write_text(content, encoding="utf-8")
     print(f"Created habit: {filepath}")
+    append_to_daily_log(f"Created habit **{habit_name}** ({frequency})")
 
 
 def check_habit(habit_id: str, check_date: str):
@@ -446,6 +497,7 @@ def check_habit(habit_id: str, check_date: str):
 
     found.write_text(text, encoding="utf-8")
     print(f"Checked in habit {habit_id} for {check_date}")
+    append_to_daily_log(f"Checked in habit **{habit_id}** for {check_date}")
 
 
 def update_project(project_name: str, fields: dict):
@@ -481,6 +533,7 @@ def update_project(project_name: str, fields: dict):
 
     filepath.write_text(text, encoding="utf-8")
     print(f"Updated project: {filepath}")
+    append_to_daily_log(f"Updated project **{project_name}**")
 
 
 def update_idea(fields: dict):
@@ -518,6 +571,7 @@ def update_idea(fields: dict):
 
     found.write_text(text, encoding="utf-8")
     print(f"Updated idea: {found}")
+    append_to_daily_log(f"Updated idea in {found.name}")
 
 
 def update_goal(goal_title: str, fields: dict):
@@ -563,6 +617,7 @@ def update_goal(goal_title: str, fields: dict):
 
     found.write_text(text, encoding="utf-8")
     print(f"Updated goal: {found}")
+    append_to_daily_log(f"Updated goal **{goal_title}**")
 
 
 def update_habit_meta(habit_name: str, fields: dict):
@@ -593,6 +648,7 @@ def update_habit_meta(habit_name: str, fields: dict):
 
     found.write_text(text, encoding="utf-8")
     print(f"Updated habit: {found}")
+    append_to_daily_log(f"Updated habit **{habit_name}**")
 
 
 # --- Intent matching ---
