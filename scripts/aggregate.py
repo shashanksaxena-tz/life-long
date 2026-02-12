@@ -38,20 +38,51 @@ def parse_frontmatter(filepath: Path) -> dict:
     body = parts[2].strip()
     meta = {}
 
-    for line in frontmatter_str.splitlines():
-        line = line.strip()
-        if not line or ":" not in line:
+    lines = frontmatter_str.splitlines()
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+        if not stripped:
+            i += 1
             continue
-        key, _, value = line.partition(":")
+
+        # Skip lines that start with "- " (list items handled by their parent key)
+        if stripped.startswith("- ") and ":" not in stripped.split("-", 1)[0]:
+            i += 1
+            continue
+
+        if ":" not in stripped:
+            i += 1
+            continue
+
+        key, _, value = stripped.partition(":")
         key = key.strip()
         value = value.strip()
 
-        # Handle YAML arrays like [backend, security]
+        # Handle YAML inline arrays like [backend, security]
         if value.startswith("[") and value.endswith("]"):
             items = value[1:-1]
             meta[key] = [item.strip() for item in items.split(",") if item.strip()]
+        elif value == "" or value == "[]":
+            # Check if next lines are multi-line YAML array items (  - item)
+            items = []
+            while i + 1 < len(lines):
+                next_line = lines[i + 1]
+                next_stripped = next_line.strip()
+                if next_stripped.startswith("- "):
+                    items.append(next_stripped[2:].strip())
+                    i += 1
+                elif next_stripped == "[]":
+                    i += 1
+                    break
+                else:
+                    break
+            meta[key] = items if items else ([] if value == "[]" else "")
         else:
             meta[key] = value
+
+        i += 1
 
     meta["_body"] = body
     return meta

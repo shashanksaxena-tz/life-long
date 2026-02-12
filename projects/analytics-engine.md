@@ -2,13 +2,19 @@
 id: analytics-engine
 name: Analytics Engine
 status: planning
-created: 2026-02-10
-tags: [frontend, data]
+created: 2026-02-01
+tags: [frontend, data, charts]
 ---
 
 ## Description
-Frontend analytics dashboard with real-time data visualization.
+Real-time analytics dashboard with event ingestion pipeline and interactive data visualizations.
 
-## Stats
-- Total tasks: 1
-- Completed: 0
+## Goals
+- Sub-second query response for common dashboards
+- Support for custom event schemas
+- Embeddable chart widgets for external use
+
+## Tech Stack
+- **Ingestion**: Apache Kafka + ClickHouse
+- **API**: GraphQL with DataLoader for batching
+- **Frontend**: D3.js + Canvas for high-performance rendering

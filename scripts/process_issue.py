@@ -413,6 +413,188 @@ created: {today}
     print(f"Created habit: {filepath}")
 
 
+def check_habit(habit_id: str, check_date: str):
+    """Add a check-in date to an existing habit."""
+    habits_dir = REPO_ROOT / "habits"
+    # Find the habit file by ID
+    found = None
+    for f in habits_dir.glob("*.md"):
+        text = f.read_text(encoding="utf-8")
+        if f"id: {habit_id}" in text:
+            found = f
+            break
+    if not found:
+        print(f"Habit not found: {habit_id}")
+        return
+
+    text = found.read_text(encoding="utf-8")
+    # Add the date to check_dates array
+    match = re.search(r"^check_dates:\s*\[([^\]]*)\]", text, re.MULTILINE)
+    if match:
+        existing = match.group(1).strip()
+        if check_date in existing:
+            print(f"Habit {habit_id} already checked in for {check_date}")
+            return
+        if existing:
+            new_dates = check_date + ", " + existing
+        else:
+            new_dates = check_date
+        text = text[:match.start()] + f"check_dates: [{new_dates}]" + text[match.end():]
+    else:
+        # No check_dates field, add one
+        text = re.sub(r"(---\n)", r"\1check_dates: [" + check_date + "]\n", text, count=1)
+
+    found.write_text(text, encoding="utf-8")
+    print(f"Checked in habit {habit_id} for {check_date}")
+
+
+def update_project(project_name: str, fields: dict):
+    """Update an existing project's status, tags, and description."""
+    slug = slugify(project_name)
+    filepath = REPO_ROOT / "projects" / f"{slug}.md"
+    if not filepath.exists():
+        # Try to find by name in all project files
+        for f in (REPO_ROOT / "projects").glob("*.md"):
+            text = f.read_text(encoding="utf-8")
+            if f"name: {project_name}" in text:
+                filepath = f
+                break
+    if not filepath.exists():
+        print(f"Project not found: {project_name}")
+        return
+
+    text = filepath.read_text(encoding="utf-8")
+    status = fields.get("status", "")
+    if status:
+        text = re.sub(r"^status:\s*.*$", f"status: {status}", text, flags=re.MULTILINE)
+    tags = fields.get("tags", "")
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        tag_str = f"[{', '.join(tag_list)}]"
+        text = re.sub(r"^tags:\s*.*$", f"tags: {tag_str}", text, flags=re.MULTILINE)
+    desc = fields.get("description", "")
+    if desc:
+        # Replace body content after second ---
+        parts = text.split("---", 2)
+        if len(parts) >= 3:
+            text = f"---{parts[1]}---\n\n{desc}\n"
+
+    filepath.write_text(text, encoding="utf-8")
+    print(f"Updated project: {filepath}")
+
+
+def update_idea(fields: dict):
+    """Update an existing idea's status, tags, and body."""
+    idea_text = fields.get("idea", "")
+    status = fields.get("status", "")
+    tags = fields.get("tags", "")
+
+    # Find the idea file - match by first line of idea text or iterate
+    ideas_dir = REPO_ROOT / "ideas"
+    found = None
+    for f in sorted(ideas_dir.glob("*.md"), reverse=True):
+        text = f.read_text(encoding="utf-8")
+        # Match if the idea body contains similar text
+        if idea_text and idea_text[:50] in text:
+            found = f
+            break
+    if not found:
+        # Create a new idea if not found
+        print(f"Idea not found, creating new idea")
+        add_idea(idea_text)
+        return
+
+    text = found.read_text(encoding="utf-8")
+    if status:
+        text = re.sub(r"^status:\s*.*$", f"status: {status}", text, flags=re.MULTILINE)
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        tag_str = f"[{', '.join(tag_list)}]"
+        text = re.sub(r"^tags:\s*.*$", f"tags: {tag_str}", text, flags=re.MULTILINE)
+    if idea_text:
+        parts = text.split("---", 2)
+        if len(parts) >= 3:
+            text = f"---{parts[1]}---\n\n{idea_text}\n"
+
+    found.write_text(text, encoding="utf-8")
+    print(f"Updated idea: {found}")
+
+
+def update_goal(goal_title: str, fields: dict):
+    """Update an existing goal."""
+    goals_dir = REPO_ROOT / "goals"
+    found = None
+    for f in goals_dir.glob("*.md"):
+        text = f.read_text(encoding="utf-8")
+        if f"title: {goal_title}" in text:
+            found = f
+            break
+    if not found:
+        print(f"Goal not found: {goal_title}")
+        return
+
+    text = found.read_text(encoding="utf-8")
+    status = fields.get("status", "")
+    if status:
+        text = re.sub(r"^status:\s*.*$", f"status: {status}", text, flags=re.MULTILINE)
+    target = fields.get("target date", "")
+    if target:
+        text = re.sub(r"^target_date:\s*.*$", f"target_date: {target}", text, flags=re.MULTILINE)
+    tags = fields.get("tags", "")
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        tag_str = f"[{', '.join(tag_list)}]"
+        text = re.sub(r"^tags:\s*.*$", f"tags: {tag_str}", text, flags=re.MULTILINE)
+    linked = fields.get("linked tasks", "")
+    if linked:
+        task_list = [t.strip() for t in linked.split(",") if t.strip()]
+        linked_yaml = "\n".join(f"  - {t}" for t in task_list)
+        text = re.sub(
+            r"^linked_tasks:\n(  - .*\n)*",
+            f"linked_tasks:\n{linked_yaml}\n",
+            text,
+            flags=re.MULTILINE,
+        )
+    desc = fields.get("description", "")
+    if desc:
+        parts = text.split("---", 2)
+        if len(parts) >= 3:
+            text = f"---{parts[1]}---\n\n{desc}\n"
+
+    found.write_text(text, encoding="utf-8")
+    print(f"Updated goal: {found}")
+
+
+def update_habit_meta(habit_name: str, fields: dict):
+    """Update habit metadata (frequency, status, tags)."""
+    habits_dir = REPO_ROOT / "habits"
+    found = None
+    for f in habits_dir.glob("*.md"):
+        text = f.read_text(encoding="utf-8")
+        if f"name: {habit_name}" in text:
+            found = f
+            break
+    if not found:
+        print(f"Habit not found: {habit_name}")
+        return
+
+    text = found.read_text(encoding="utf-8")
+    freq = fields.get("frequency", "")
+    if freq:
+        text = re.sub(r"^frequency:\s*.*$", f"frequency: {freq}", text, flags=re.MULTILINE)
+    status = fields.get("status", "")
+    if status:
+        text = re.sub(r"^status:\s*.*$", f"status: {status}", text, flags=re.MULTILINE)
+    tags = fields.get("tags", "")
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        tag_str = f"[{', '.join(tag_list)}]"
+        text = re.sub(r"^tags:\s*.*$", f"tags: {tag_str}", text, flags=re.MULTILINE)
+
+    found.write_text(text, encoding="utf-8")
+    print(f"Updated habit: {found}")
+
+
 # --- Intent matching ---
 
 # Try AI parsing first (non-blocking)
@@ -464,6 +646,34 @@ elif title_lower.startswith("create goal:"):
 elif title_lower.startswith("create habit:"):
     habit_name = title.split(":", 1)[1].strip()
     create_habit(habit_name)
+
+elif title_lower.startswith("check habit:"):
+    fields = parse_body_fields(body)
+    habit_id = fields.get("habit id", "").strip()
+    check_date = fields.get("check date", today).strip()
+    if habit_id:
+        check_habit(habit_id, check_date)
+    else:
+        print(f"Missing habit ID in body for: {title}")
+
+elif title_lower.startswith("update project:"):
+    fields = parse_body_fields(body)
+    project_name = fields.get("project name", title.split(":", 1)[1].strip())
+    update_project(project_name, fields)
+
+elif title_lower.startswith("update idea:"):
+    fields = parse_body_fields(body)
+    update_idea(fields)
+
+elif title_lower.startswith("update goal:"):
+    fields = parse_body_fields(body)
+    goal_title = fields.get("goal title", title.split(":", 1)[1].strip())
+    update_goal(goal_title, fields)
+
+elif title_lower.startswith("update habit:"):
+    fields = parse_body_fields(body)
+    habit_name = fields.get("name", title.split(":", 1)[1].strip())
+    update_habit_meta(habit_name, fields)
 
 elif ai_result and ai_result.get("action") != "unknown":
     # AI understood the intent even without a standard prefix
