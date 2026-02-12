@@ -6,7 +6,48 @@
 <title>Projects - Life Long</title>
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0d1117">
+<meta name="theme-color" content="#09090b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.project-burndown {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 8px;
+}
+.project-burndown h4,
+.project-timeline h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.project-burndown canvas {
+  width: 100% !important;
+  max-height: 180px;
+}
+.project-timeline {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 8px;
+}
+.project-timeline .timeline {
+  margin-top: 0.5rem;
+}
+.project-timeline .no-activity {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+</style>
 </head>
 <body>
 <nav>
@@ -45,6 +86,11 @@
 var allProjects = [];
 var allTasks = [];
 var currentFilter = 'all';
+var burndownCharts = {};
+
+function getThemeColor(varName) {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+}
 
 function exportProjects(format) {
   if (format === 'json') LL.exportJSON(allProjects, 'life-long-projects.json');
@@ -60,6 +106,46 @@ function getProjectTaskCounts(projectId) {
   return { total: total, done: done };
 }
 
+function getProjectTasks(projectId) {
+  return allTasks.filter(function(t) { return t.project === projectId; });
+}
+
+function buildProjectTimelineHTML(projectId) {
+  var tasks = getProjectTasks(projectId);
+  if (tasks.length === 0) {
+    return '<div class="no-activity">No task activity for this project.</div>';
+  }
+
+  // Sort by updated (or created) descending, take last 10
+  var sorted = tasks.slice().sort(function(a, b) {
+    var da = new Date(a.updated || a.created || 0);
+    var db = new Date(b.updated || b.created || 0);
+    return db - da;
+  });
+  var recent = sorted.slice(0, 10);
+
+  var html = '<div class="timeline">';
+  recent.forEach(function(t) {
+    var dateStr = t.updated || t.created || '';
+    var statusLabel = (t.status || 'unknown');
+    var statusAction = '';
+    if (statusLabel === 'done') statusAction = 'Completed';
+    else if (statusLabel === 'in-progress') statusAction = 'In progress';
+    else if (statusLabel === 'todo') statusAction = 'Created';
+    else statusAction = statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1);
+
+    html += '<div class="timeline-item type-task">' +
+      '<div class="timeline-date">' + LL.formatDate(dateStr) + '</div>' +
+      '<div class="timeline-content">' +
+        '<div class="tl-title">' + (t.title || t.id) + '</div>' +
+        '<div class="tl-body">' + statusAction + ' &middot; ' + (t.tags || []).join(', ') + '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
 function renderProjects(filter) {
   currentFilter = filter;
   var searchQuery = document.getElementById('search-input').value.trim();
@@ -72,6 +158,14 @@ function renderProjects(filter) {
   var list = document.getElementById('projects-list');
   if (filtered.length === 0) { list.innerHTML = '<div class="empty-state">No projects found.</div>'; return; }
 
+  // Destroy existing burndown charts before re-rendering
+  Object.keys(burndownCharts).forEach(function(key) {
+    if (burndownCharts[key]) {
+      burndownCharts[key].destroy();
+      delete burndownCharts[key];
+    }
+  });
+
   list.innerHTML = filtered.map(function(p, i) {
     var tags = (p.tags || []).map(function(t) { return '<span class="tag">' + t + '</span>'; }).join('');
     var counts = getProjectTaskCounts(p.id);
@@ -80,7 +174,10 @@ function renderProjects(filter) {
     var trend = LL.weeklyCompletionTrend(allTasks.filter(function(t) { return t.project === p.id; }));
     var sparkHtml = LL.sparklineSVG(trend, 60, 16);
 
-    return '<div class="project-card" data-index="' + i + '">' +
+    var canvasId = 'burndown-' + p.id;
+    var timelineHtml = buildProjectTimelineHTML(p.id);
+
+    return '<div class="project-card" data-index="' + i + '" data-project-id="' + p.id + '">' +
       '<div class="project-header" onclick="toggleProject(this)">' +
         '<div class="project-info">' +
           '<div class="project-name">' + (p.name || p.id) + '</div>' +
@@ -97,9 +194,149 @@ function renderProjects(filter) {
       '</div>' +
       '<div class="project-body">' +
         '<div class="project-body-content">' + (p.body || 'No description available.') + '</div>' +
+        '<div class="project-burndown">' +
+          '<h4>Burndown (30 days)</h4>' +
+          '<canvas id="' + canvasId + '" height="180"></canvas>' +
+        '</div>' +
+        '<div class="project-timeline">' +
+          '<h4>Recent Activity</h4>' +
+          timelineHtml +
+        '</div>' +
       '</div>' +
     '</div>';
   }).join('');
+
+  // Initialize burndown charts after DOM is rendered
+  initProjectBurndownCharts(filtered);
+}
+
+function initProjectBurndownCharts(projects) {
+  var textMuted = getThemeColor('--text-muted') || '#8b949e';
+  var gridColor = getThemeColor('--chart-grid') || '#21262d';
+  var accentGreen = getThemeColor('--accent-green-text') || '#3fb950';
+  var accentBlue = getThemeColor('--accent-blue') || '#58a6ff';
+  var bgSecondary = getThemeColor('--bg-secondary') || '#161b22';
+  var textPrimary = getThemeColor('--text-primary') || '#f0f6fc';
+  var textSecondary = getThemeColor('--text-secondary') || '#c9d1d9';
+  var borderPrimary = getThemeColor('--border-primary') || '#30363d';
+
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  projects.forEach(function(p) {
+    var canvasId = 'burndown-' + p.id;
+    var canvasEl = document.getElementById(canvasId);
+    if (!canvasEl) return;
+
+    var projectTasks = getProjectTasks(p.id);
+    var labels = [];
+    var completedCumulative = [];
+    var createdCumulative = [];
+    var totalCompleted = 0;
+    var totalCreated = 0;
+
+    for (var d = 29; d >= 0; d--) {
+      var date = new Date(today);
+      date.setDate(date.getDate() - d);
+      var dateStr = date.toISOString().split('T')[0];
+      labels.push(dateStr);
+
+      var dayCompleted = 0;
+      var dayCreated = 0;
+
+      projectTasks.forEach(function(t) {
+        var updated = (t.updated || t.created || '').split('T')[0];
+        var created = (t.created || '').split('T')[0];
+        if (t.status === 'done' && updated === dateStr) dayCompleted++;
+        if (created === dateStr) dayCreated++;
+      });
+
+      totalCompleted += dayCompleted;
+      totalCreated += dayCreated;
+      completedCumulative.push(totalCompleted);
+      createdCumulative.push(totalCreated);
+    }
+
+    var ctx = canvasEl.getContext('2d');
+    burndownCharts[p.id] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels.map(function(l) {
+          var parts = l.split('-');
+          return parts[1] + '/' + parts[2];
+        }),
+        datasets: [
+          {
+            label: 'Created (cumulative)',
+            data: createdCumulative,
+            borderColor: accentBlue,
+            backgroundColor: accentBlue + '20',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            borderWidth: 2
+          },
+          {
+            label: 'Completed (cumulative)',
+            data: completedCumulative,
+            borderColor: accentGreen,
+            backgroundColor: accentGreen + '20',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: textMuted,
+              stepSize: 1
+            },
+            grid: { color: gridColor }
+          },
+          x: {
+            ticks: {
+              color: textMuted,
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 8
+            },
+            grid: { display: false }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: textMuted,
+              padding: 12,
+              usePointStyle: true,
+              font: { size: 11 }
+            }
+          },
+          tooltip: {
+            backgroundColor: bgSecondary,
+            titleColor: textPrimary,
+            bodyColor: textSecondary,
+            borderColor: borderPrimary,
+            borderWidth: 1
+          }
+        }
+      }
+    });
+  });
 }
 
 function toggleProject(headerEl) {
