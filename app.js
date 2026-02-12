@@ -28,7 +28,7 @@
   async function loadSiteData() {
     if (cachedData) return cachedData;
     try {
-      var res = await fetch('data/index.json');
+      var res = await fetch('data/index.json?t=' + Date.now());
       cachedData = await res.json();
       return cachedData;
     } catch(e) { return null; }

@@ -153,7 +153,7 @@ function renderGoals(goals) {
 
 async function loadGoals() {
   try {
-    var res = await fetch('data/index.json');
+    var res = await fetch('data/index.json?t=' + Date.now());
     var data = await res.json();
     allGoals = data.goals || [];
     allTasks = data.tasks || [];

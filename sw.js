@@ -1,4 +1,4 @@
-var CACHE_NAME = 'life-long-v2';
+var CACHE_NAME = 'life-long-v3';
 var URLS_TO_CACHE = [
   './',
   'index.html',
@@ -11,8 +11,7 @@ var URLS_TO_CACHE = [
   'style.css',
   'utils.js',
   'app.js',
-  'manifest.json',
-  'data/index.json'
+  'manifest.json'
 ];
 
 self.addEventListener('install', function(event) {
@@ -25,6 +24,18 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+  var url = new URL(event.request.url);
+
+  // Never cache data/index.json — always go to network for fresh data
+  if (url.pathname.endsWith('/index.json')) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' }).catch(function() {
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
   event.respondWith(
     fetch(event.request).then(function(response) {
       if (response.ok) {

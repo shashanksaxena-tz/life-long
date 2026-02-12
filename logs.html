@@ -102,7 +102,7 @@ function renderLogs(logs) {
 
 async function loadLogs() {
   try {
-    var res = await fetch('data/index.json');
+    var res = await fetch('data/index.json?t=' + Date.now());
     var data = await res.json();
     allLogs = data.logs || [];
 

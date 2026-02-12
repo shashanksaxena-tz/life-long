@@ -374,7 +374,7 @@ function toggleProject(headerEl) {
 
 async function loadProjects() {
   try {
-    var res = await fetch('data/index.json');
+    var res = await fetch('data/index.json?t=' + Date.now());
     var data = await res.json();
     allProjects = data.projects || [];
     allTasks = data.tasks || [];

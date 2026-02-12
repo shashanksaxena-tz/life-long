@@ -126,7 +126,7 @@ function renderIdeas(ideas) {
 
 async function loadIdeas() {
   try {
-    var res = await fetch('data/index.json');
+    var res = await fetch('data/index.json?t=' + Date.now());
     var data = await res.json();
     allIdeas = data.ideas || [];
 

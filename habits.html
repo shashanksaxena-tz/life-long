@@ -219,7 +219,7 @@ function renderHabits(habits) {
 
 async function loadHabits() {
   try {
-    var res = await fetch('data/index.json');
+    var res = await fetch('data/index.json?t=' + Date.now());
     var data = await res.json();
     allHabits = data.habits || [];
 

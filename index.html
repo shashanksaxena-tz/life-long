@@ -491,7 +491,7 @@ function renderTimeline(data) {
 
 async function loadDashboard() {
   try {
-    var res = await fetch('data/index.json');
+    var res = await fetch('data/index.json?t=' + Date.now());
     var data = await res.json();
     dashboardData = data;
     var stats = data.stats;
