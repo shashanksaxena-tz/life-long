@@ -7,4 +7,4 @@ tags: [Frontend, Backend, Estimations]
 ---
 
 ## Description
-## Desc
+ASG - Lucy project.

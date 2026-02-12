@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-12T05:47:16.481949",
+  "generated_at": "2026-02-12T05:51:57.859161",
   "stats": {
     "total_projects": 8,
     "active_projects": 6,
@@ -98,7 +98,7 @@
         "Backend",
         "Estimations"
       ],
-      "body": "## Description\n## Desc"
+      "body": "## Description\nASG - Lucy project."
     },
     {
       "id": "asg",

@@ -7,11 +7,20 @@ on:
 permissions:
   contents: write
   issues: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   process:
     runs-on: ubuntu-latest
     if: contains(github.event.issue.labels.*.name, 'input')
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,6 +50,18 @@ jobs:
           git diff --cached --quiet && echo "No changes" && exit 0
           git commit -m "feat: process issue #${{ github.event.issue.number }} - ${{ github.event.issue.title }}"
           git push origin claude/design-github-system-RCORX
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: Close issue
         env:
