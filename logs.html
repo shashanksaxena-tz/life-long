@@ -26,8 +26,13 @@
 </nav>
 
 <div class="container-narrow">
-  <h1>Daily Logs</h1>
-  <p class="subtitle" id="log-count">Loading logs...</p>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+    <div>
+      <h1>Daily Logs</h1>
+      <p class="subtitle" id="log-count">Loading logs...</p>
+    </div>
+    <button class="page-action-btn" onclick="if(window.llShowAddModal)window.llShowAddModal('log')">+ Add Log Entry</button>
+  </div>
 
   <div class="search-bar">
     <input type="text" class="search-input" id="search-input" placeholder="Search logs... (press / to focus)" oninput="filterLogs()">

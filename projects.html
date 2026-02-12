@@ -64,8 +64,13 @@
 </nav>
 
 <div class="container">
-  <h1>Projects</h1>
-  <p class="subtitle" id="project-count">Loading projects...</p>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+    <div>
+      <h1>Projects</h1>
+      <p class="subtitle" id="project-count">Loading projects...</p>
+    </div>
+    <button class="page-action-btn" onclick="if(window.llShowAddModal)window.llShowAddModal('project')">+ Add Project</button>
+  </div>
 
   <div class="search-bar">
     <input type="text" class="search-input" id="search-input" placeholder="Search projects... (press / to focus)" oninput="renderProjects(currentFilter)">
@@ -108,6 +113,24 @@ function getProjectTaskCounts(projectId) {
 
 function getProjectTasks(projectId) {
   return allTasks.filter(function(t) { return t.project === projectId; });
+}
+
+function parseTimeSpent(ts) {
+  if (!ts) return 0;
+  var hours = 0;
+  var hMatch = ts.match(/(\d+\.?\d*)h/);
+  var mMatch = ts.match(/(\d+)m/);
+  if (hMatch) hours += parseFloat(hMatch[1]);
+  if (mMatch) hours += parseInt(mMatch[1]) / 60;
+  return hours;
+}
+
+function getProjectTimeSpent(projectId) {
+  var tasks = getProjectTasks(projectId);
+  var totalHours = 0;
+  tasks.forEach(function(t) { totalHours += parseTimeSpent(t.time_spent); });
+  if (totalHours === 0) return '';
+  return '<h4>Time Invested</h4><div class="time-total-value">' + totalHours + 'h total across ' + tasks.filter(function(t){return t.time_spent;}).length + ' tasks</div>';
 }
 
 function buildProjectTimelineHTML(projectId) {
@@ -193,7 +216,8 @@ function renderProjects(filter) {
         '<span class="project-toggle">&#9654;</span>' +
       '</div>' +
       '<div class="project-body">' +
-        '<div class="project-body-content">' + (p.body || 'No description available.') + '</div>' +
+        '<div class="project-body-content">' + LL.renderMarkdown(p.body || 'No description available.') + '</div>' +
+        '<div class="project-time-total">' + getProjectTimeSpent(p.id) + '</div>' +
         '<div class="project-burndown">' +
           '<h4>Burndown (30 days)</h4>' +
           '<canvas id="' + canvasId + '" height="180"></canvas>' +

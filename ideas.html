@@ -26,8 +26,13 @@
 </nav>
 
 <div class="container">
-  <h1>Ideas</h1>
-  <p class="subtitle" id="idea-count">Loading ideas...</p>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+    <div>
+      <h1>Ideas</h1>
+      <p class="subtitle" id="idea-count">Loading ideas...</p>
+    </div>
+    <button class="page-action-btn" onclick="if(window.llShowAddModal)window.llShowAddModal('idea')">+ Add Idea</button>
+  </div>
 
   <div class="search-bar">
     <input type="text" class="search-input" id="search-input" placeholder="Search ideas... (press / to focus)" oninput="applyFilters()">

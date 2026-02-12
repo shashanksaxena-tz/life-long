@@ -26,8 +26,13 @@
 </nav>
 
 <div class="container">
-  <h1>Habits</h1>
-  <p class="subtitle" id="habit-count">Loading habits...</p>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+    <div>
+      <h1>Habits</h1>
+      <p class="subtitle" id="habit-count">Loading habits...</p>
+    </div>
+    <button class="page-action-btn" onclick="if(window.llShowAddModal)window.llShowAddModal('habit')">+ Add Habit</button>
+  </div>
 
   <div class="search-bar">
     <input type="text" class="search-input" id="search-input" placeholder="Search habits... (press / to focus)" oninput="applyFilters()">

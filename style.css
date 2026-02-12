@@ -849,10 +849,9 @@ h2 {
 }
 
 .task-body {
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-size: 0.88rem;
+  color: var(--text-secondary);
   margin-top: 0.5rem;
-  white-space: pre-wrap;
   line-height: 1.7;
   border-top: 1px solid var(--border-secondary);
   padding-top: 0.75rem;
@@ -968,7 +967,6 @@ h2 {
   font-size: 0.9rem;
   color: var(--text-secondary);
   line-height: 1.7;
-  white-space: pre-wrap;
 }
 
 .project-task-count {
@@ -1043,48 +1041,96 @@ h2 {
   line-height: 1.8;
 }
 
-/* --- Markdown Rendering --- */
+/* --- Page Action Buttons --- */
+.page-action-btn {
+  background: var(--accent-green);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.15rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 550;
+  font-family: inherit;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.page-action-btn:hover {
+  background: var(--accent-green-hover);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+  transform: translateY(-1px);
+}
+
+.page-action-btn:active {
+  transform: scale(0.97);
+}
+
+.page-action-btn.secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.page-action-btn.secondary:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-md);
+}
+
+/* --- Markdown Rendering (all card types) --- */
 .log-body h1, .log-body h2, .log-body h3, .log-body h4,
 .idea-body h1, .idea-body h2, .idea-body h3, .idea-body h4,
-.task-body h1, .task-body h2, .task-body h3, .task-body h4 {
+.task-body h1, .task-body h2, .task-body h3, .task-body h4,
+.goal-body h1, .goal-body h2, .goal-body h3, .goal-body h4,
+.project-body-content h1, .project-body-content h2, .project-body-content h3, .project-body-content h4 {
   color: var(--text-primary);
   margin: 1.25rem 0 0.5rem;
   letter-spacing: -0.01em;
 }
 
-.log-body h1, .idea-body h1 {
+.log-body h1, .idea-body h1, .task-body h1, .goal-body h1, .project-body-content h1 {
   font-size: 1.4rem;
   font-weight: 650;
   border-bottom: 1px solid var(--border-secondary);
   padding-bottom: 0.5rem;
 }
 
-.log-body h2, .idea-body h2 {
+.log-body h2, .idea-body h2, .task-body h2, .goal-body h2, .project-body-content h2 {
   font-size: 1.2rem;
   font-weight: 600;
   border-bottom: 1px solid var(--border-secondary);
   padding-bottom: 0.4rem;
 }
 
-.log-body h3, .idea-body h3 {
+.log-body h3, .idea-body h3, .task-body h3, .goal-body h3, .project-body-content h3 {
   font-size: 1.05rem;
   font-weight: 600;
 }
 
-.log-body p, .idea-body p {
+.log-body h4, .idea-body h4, .task-body h4, .goal-body h4, .project-body-content h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.log-body p, .idea-body p, .task-body p, .goal-body p, .project-body-content p {
   margin-bottom: 0.75rem;
 }
 
 .log-body ul, .log-body ol,
-.idea-body ul, .idea-body ol {
+.idea-body ul, .idea-body ol,
+.task-body ul, .task-body ol,
+.goal-body ul, .goal-body ol,
+.project-body-content ul, .project-body-content ol {
   margin: 0.5rem 0 0.75rem 1.5rem;
 }
 
-.log-body li, .idea-body li {
+.log-body li, .idea-body li, .task-body li, .goal-body li, .project-body-content li {
   margin-bottom: 0.35rem;
 }
 
-.log-body code, .idea-body code {
+.log-body code, .idea-body code, .task-body code, .goal-body code, .project-body-content code {
   background: var(--bg-tertiary);
   padding: 0.2rem 0.45rem;
   border-radius: 6px;
@@ -1093,7 +1139,7 @@ h2 {
   font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 }
 
-.log-body pre, .idea-body pre {
+.log-body pre, .idea-body pre, .task-body pre, .goal-body pre, .project-body-content pre {
   background: var(--bg-primary);
   border-radius: 10px;
   padding: 1.25rem;
@@ -1102,55 +1148,91 @@ h2 {
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.log-body pre code, .idea-body pre code {
+.log-body pre code, .idea-body pre code, .task-body pre code, .goal-body pre code, .project-body-content pre code {
   background: none;
   padding: 0;
 }
 
-.log-body blockquote, .idea-body blockquote {
+.log-body blockquote, .idea-body blockquote, .task-body blockquote, .goal-body blockquote, .project-body-content blockquote {
   border-left: 3px solid var(--accent-blue);
   padding-left: 1rem;
   color: var(--text-muted);
   margin: 0.75rem 0;
+  font-style: italic;
 }
 
-.log-body strong, .idea-body strong {
+.log-body strong, .idea-body strong, .task-body strong, .goal-body strong, .project-body-content strong {
   color: var(--text-primary);
   font-weight: 600;
 }
 
-.log-body hr, .idea-body hr {
+.log-body em, .idea-body em, .task-body em, .goal-body em, .project-body-content em {
+  color: var(--text-secondary);
+}
+
+.log-body hr, .idea-body hr, .task-body hr, .goal-body hr, .project-body-content hr {
   border: none;
   border-top: 1px solid var(--border-secondary);
   margin: 1.25rem 0;
 }
 
-.log-body a, .idea-body a {
+.log-body a, .idea-body a, .task-body a, .goal-body a, .project-body-content a {
   color: var(--accent-blue);
 }
 
-.log-body img, .idea-body img {
+.log-body img, .idea-body img, .task-body img, .goal-body img, .project-body-content img {
   max-width: 100%;
   border-radius: 10px;
 }
 
-.log-body table, .idea-body table {
+.log-body table, .idea-body table, .task-body table, .goal-body table, .project-body-content table {
   width: 100%;
   border-collapse: collapse;
   margin: 0.75rem 0;
 }
 
 .log-body th, .log-body td,
-.idea-body th, .idea-body td {
+.idea-body th, .idea-body td,
+.task-body th, .task-body td,
+.goal-body th, .goal-body td,
+.project-body-content th, .project-body-content td {
   border: 1px solid var(--border-primary);
   padding: 0.5rem 0.85rem;
   text-align: left;
 }
 
-.log-body th, .idea-body th {
+.log-body th, .idea-body th, .task-body th, .goal-body th, .project-body-content th {
   background: var(--bg-tertiary);
   color: var(--text-primary);
   font-weight: 600;
+}
+
+/* --- Project Time Total --- */
+.project-time-total {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 8px;
+}
+
+.project-time-total:empty {
+  display: none;
+}
+
+.project-time-total h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.time-total-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent-blue);
 }
 
 /* --- Ideas Grid --- */
@@ -1831,6 +1913,73 @@ h2 {
   background: rgba(239, 68, 68, 0.1);
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
+  font-weight: 500;
+}
+
+/* --- Dependency Graph --- */
+.dep-graph-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dep-graph-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dep-node {
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  padding: 0.85rem 1.15rem;
+  box-shadow: var(--shadow-sm);
+  min-width: 180px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-left: 3px solid var(--accent-blue);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dep-node:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.dep-node.dep-done {
+  border-left-color: var(--accent-green);
+  opacity: 0.7;
+}
+
+.dep-node.dep-blocked {
+  border-left-color: var(--accent-red);
+}
+
+.dep-node.dep-pending {
+  border-left-color: var(--accent-yellow);
+}
+
+.dep-node-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+}
+
+.dep-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
+
+.dep-arrow-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   font-weight: 500;
 }
 

@@ -31,9 +31,13 @@
       <h1>Tasks</h1>
       <p class="subtitle" id="task-count">Loading tasks...</p>
     </div>
+    <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap">
+    <button class="page-action-btn" onclick="if(window.llShowAddModal)window.llShowAddModal('task')">+ Add Task</button>
+    <button class="page-action-btn secondary" onclick="if(window.llShowAddModal)window.llShowAddModal('update')">Update Task</button>
     <div class="view-toggle" id="view-toggle">
       <button class="view-toggle-btn active" data-view="list" onclick="setView('list')">List</button>
       <button class="view-toggle-btn" data-view="kanban" onclick="setView('kanban')">Kanban</button>
+    </div>
     </div>
   </div>
 
@@ -100,6 +104,14 @@
         <div class="kanban-column-body" id="kanban-done"></div>
       </div>
     </div>
+  </div>
+
+  <div id="dep-graph-section" style="display:none;margin-top:2rem">
+    <div class="section-header">
+      <h2>Dependency Graph</h2>
+      <span style="font-size:0.85rem;color:var(--text-muted)">Blocked tasks</span>
+    </div>
+    <div id="dep-graph" class="dep-graph-container"></div>
   </div>
 </div>
 
@@ -219,7 +231,7 @@ function renderTasks(tasks) {
         '<span>Updated ' + LL.formatDate(t.updated || t.created) + '</span>' +
       '</div>' +
       (tags ? '<div class="task-tags">' + tags + '</div>' : '') +
-      (hasBody ? '<div class="task-body">' + t.body + '</div>' : '') +
+      (hasBody ? '<div class="task-body">' + LL.renderMarkdown(t.body) + '</div>' : '') +
     '</div>';
   }).join('');
 }
@@ -316,10 +328,45 @@ async function loadTasks() {
     });
 
     applyFilters();
+    renderDepGraph();
   } catch (err) {
     document.getElementById('tasks-list').innerHTML = '<div class="empty-state" style="color:var(--accent-red)">Failed to load data.</div>';
     console.error('Failed to load tasks:', err);
   }
+}
+
+function renderDepGraph() {
+  var blockedTasks = allTasks.filter(function(t) { return t.blocked_by; });
+  var section = document.getElementById('dep-graph-section');
+  if (blockedTasks.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  var container = document.getElementById('dep-graph');
+
+  var html = '';
+  blockedTasks.forEach(function(blocked) {
+    var blockerId = blocked.blocked_by;
+    var blocker = allTasks.find(function(t) { return t.id === blockerId; });
+    var blockerTitle = blocker ? (blocker.title || blocker.id) : blockerId;
+    var blockerStatus = blocker ? blocker.status : 'unknown';
+    var blockedStatus = blocked.status;
+
+    html += '<div class="dep-graph-row">' +
+      '<div class="dep-node ' + (blockerStatus === 'done' ? 'dep-done' : 'dep-pending') + '">' +
+        '<div class="dep-node-title">' + blockerTitle + '</div>' +
+        '<span class="badge ' + LL.badgeClass(blockerStatus) + '">' + blockerStatus + '</span>' +
+      '</div>' +
+      '<div class="dep-arrow">' +
+        '<svg width="40" height="24" viewBox="0 0 40 24"><path d="M0 12 L30 12 M24 6 L30 12 L24 18" stroke="var(--text-muted)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '<span class="dep-arrow-label">blocks</span>' +
+      '</div>' +
+      '<div class="dep-node ' + (blockedStatus === 'done' ? 'dep-done' : 'dep-blocked') + '">' +
+        '<div class="dep-node-title">' + (blocked.title || blocked.id) + '</div>' +
+        '<span class="badge ' + LL.badgeClass(blockedStatus) + '">' + blockedStatus + '</span>' +
+      '</div>' +
+    '</div>';
+  });
+
+  container.innerHTML = html;
 }
 
 loadTasks();
