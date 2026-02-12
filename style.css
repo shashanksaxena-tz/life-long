@@ -2009,6 +2009,175 @@ h2 {
   font-size: 0.925rem;
 }
 
+/* --- Skeleton Loading --- */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-hover) 37%, var(--bg-tertiary) 63%);
+  background-size: 400px 100%;
+  animation: shimmer 1.5s ease infinite;
+  border-radius: 8px;
+}
+
+.skeleton-card {
+  height: 120px;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-line.short { width: 40%; }
+.skeleton-line.medium { width: 65%; }
+.skeleton-line.long { width: 85%; }
+
+/* --- Card Entrance Animation --- */
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.task-card,
+.project-card,
+.idea-card,
+.goal-card,
+.habit-card,
+.log-entry,
+.dep-graph-row {
+  animation: cardEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.task-card:nth-child(1), .idea-card:nth-child(1), .goal-card:nth-child(1), .habit-card:nth-child(1), .log-entry:nth-child(1), .dep-graph-row:nth-child(1) { animation-delay: 0.03s; }
+.task-card:nth-child(2), .idea-card:nth-child(2), .goal-card:nth-child(2), .habit-card:nth-child(2), .log-entry:nth-child(2), .dep-graph-row:nth-child(2) { animation-delay: 0.06s; }
+.task-card:nth-child(3), .idea-card:nth-child(3), .goal-card:nth-child(3), .habit-card:nth-child(3), .log-entry:nth-child(3), .dep-graph-row:nth-child(3) { animation-delay: 0.09s; }
+.task-card:nth-child(4), .idea-card:nth-child(4), .goal-card:nth-child(4), .habit-card:nth-child(4), .log-entry:nth-child(4), .dep-graph-row:nth-child(4) { animation-delay: 0.12s; }
+.task-card:nth-child(5), .idea-card:nth-child(5), .goal-card:nth-child(5), .habit-card:nth-child(5), .log-entry:nth-child(5), .dep-graph-row:nth-child(5) { animation-delay: 0.15s; }
+.task-card:nth-child(6), .idea-card:nth-child(6), .goal-card:nth-child(6), .habit-card:nth-child(6), .log-entry:nth-child(6) { animation-delay: 0.18s; }
+.task-card:nth-child(7), .idea-card:nth-child(7) { animation-delay: 0.21s; }
+.task-card:nth-child(8), .idea-card:nth-child(8) { animation-delay: 0.24s; }
+.task-card:nth-child(9) { animation-delay: 0.27s; }
+.task-card:nth-child(10) { animation-delay: 0.3s; }
+.task-card:nth-child(n+11) { animation-delay: 0.33s; }
+
+/* --- Markdown Checkbox Lists --- */
+.md-checkbox {
+  list-style: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 0.3rem 0;
+  position: relative;
+  margin-left: -1.5rem;
+}
+
+.md-checkbox .md-check {
+  flex-shrink: 0;
+  font-size: 1.1em;
+  line-height: 1;
+  color: var(--text-muted);
+  margin-top: 0.05em;
+}
+
+.md-checkbox.checked .md-check {
+  color: var(--accent-green);
+}
+
+.md-checkbox.checked .md-check-text {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--text-muted);
+}
+
+.md-checkbox .md-check-text {
+  color: var(--text-secondary);
+}
+
+/* --- Code Block Enhancements --- */
+.code-block {
+  position: relative;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.code-block code {
+  display: block;
+  padding: 1.25rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  tab-size: 2;
+  color: var(--text-primary);
+}
+
+/* Syntax highlighting via token classes */
+.code-block .keyword { color: #c678dd; }
+.code-block .string { color: #98c379; }
+.code-block .comment { color: var(--text-muted); font-style: italic; }
+.code-block .number { color: #d19a66; }
+.code-block .function { color: #61afef; }
+.code-block .operator { color: #56b6c2; }
+
+.inline-code {
+  background: var(--bg-tertiary);
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.85em;
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  color: var(--accent-blue);
+  border: 1px solid var(--border-secondary);
+}
+
+/* --- Strikethrough --- */
+del {
+  color: var(--text-muted);
+  text-decoration-color: var(--text-muted);
+}
+
+/* --- Stat Card Pulse on Load --- */
+@keyframes countUp {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.stat-value {
+  animation: countUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.stat-card:nth-child(1) .stat-value { animation-delay: 0.1s; }
+.stat-card:nth-child(2) .stat-value { animation-delay: 0.15s; }
+.stat-card:nth-child(3) .stat-value { animation-delay: 0.2s; }
+.stat-card:nth-child(4) .stat-value { animation-delay: 0.25s; }
+
+/* --- Section Headers --- */
+.section-header h2 {
+  position: relative;
+}
+
+/* --- Focus Ring Enhancement --- */
+.search-input:focus,
+.filter-btn:focus-visible,
+.page-action-btn:focus-visible,
+.export-btn:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
 /* --- Responsive --- */
 @media (max-width: 768px) {
   nav {

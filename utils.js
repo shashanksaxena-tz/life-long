@@ -84,13 +84,14 @@ var LL = (function() {
 
     html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    // Code blocks
+    // Code blocks (preserve language for syntax highlighting)
     html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(m, lang, code) {
-      return '<pre><code>' + code.trim() + '</code></pre>';
+      var langClass = lang ? ' class="language-' + lang + '"' : '';
+      return '<pre class="code-block"><code' + langClass + '>' + code.trim() + '</code></pre>';
     });
 
     // Inline code
-    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    html = html.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
 
     // Headers
     html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
@@ -103,21 +104,29 @@ var LL = (function() {
     html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
 
+    // Strikethrough
+    html = html.replace(/~~(.+?)~~/g, '<del>$1</del>');
+
     // Links
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
 
     // Images
-    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy">');
 
     // Horizontal rule
     html = html.replace(/^---$/gm, '<hr>');
 
-    // Blockquotes
+    // Blockquotes (handle multi-line)
     html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+    html = html.replace(/<\/blockquote>\n<blockquote>/g, '\n');
+
+    // Checkbox lists (must come before regular lists)
+    html = html.replace(/^[\s]*[-*] \[x\] (.+)$/gm, '<li class="md-checkbox checked"><span class="md-check">&#9745;</span> <span class="md-check-text">$1</span></li>');
+    html = html.replace(/^[\s]*[-*] \[ \] (.+)$/gm, '<li class="md-checkbox"><span class="md-check">&#9744;</span> <span class="md-check-text">$1</span></li>');
 
     // Unordered lists
     html = html.replace(/^[\s]*[-*] (.+)$/gm, '<li>$1</li>');
-    html = html.replace(/(<li>[\s\S]*?<\/li>)/g, function(match) {
+    html = html.replace(/(<li[\s>][\s\S]*?<\/li>)/g, function(match) {
       if (match.indexOf('<ul>') === -1) {
         return '<ul>' + match + '</ul>';
       }
@@ -126,7 +135,14 @@ var LL = (function() {
     html = html.replace(/<\/ul>\s*<ul>/g, '');
 
     // Ordered lists
-    html = html.replace(/^[\s]*\d+\. (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/^[\s]*\d+\. (.+)$/gm, '<li class="md-ol-item">$1</li>');
+    html = html.replace(/(<li class="md-ol-item">[\s\S]*?<\/li>)/g, function(match) {
+      if (match.indexOf('<ol>') === -1) {
+        return '<ol>' + match + '</ol>';
+      }
+      return match;
+    });
+    html = html.replace(/<\/ol>\s*<ol>/g, '');
 
     // Paragraphs
     var lines = html.split('\n');
