@@ -663,7 +663,6 @@
   }
 
   function habitActionsHTML(habitId, habitName) {
-    var today = new Date().toISOString().split('T')[0];
     return '<div class="ll-card-actions">' +
       '<button class="ll-card-btn btn-check" onclick="event.stopPropagation();window.llCheckHabit(\'' + escapeHtml(habitId) + '\',\'' + escapeHtml(habitName) + '\',this)">&#10003; Check In Today</button>' +
       '<button class="ll-card-btn" onclick="event.stopPropagation();window.llEditHabit(\'' + escapeHtml(habitId) + '\')">&#9998; Edit</button>' +
@@ -718,7 +717,7 @@
   };
 
   window.llCheckHabit = function(habitId, habitName, btnEl) {
-    var today = new Date().toISOString().split('T')[0];
+    var today = LL.toLocalDateStr(new Date());
     quickAction(btnEl,
       'Check Habit: ' + (habitName || habitId),
       '### Habit ID\n\n' + habitId + '\n\n### Check Date\n\n' + today,

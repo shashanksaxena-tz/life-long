@@ -110,7 +110,7 @@ function calculateStreak(checkDates, frequency) {
   var sorted = checkDates.slice().sort().reverse();
   var today = new Date();
   today.setHours(0, 0, 0, 0);
-  var todayStr = today.toISOString().split('T')[0];
+  var todayStr = LL.toLocalDateStr(today);
 
   if (frequency === 'weekly') {
     // For weekly habits, check if there's a check within each rolling 7-day window
@@ -120,8 +120,8 @@ function calculateStreak(checkDates, frequency) {
     windowStart.setDate(windowStart.getDate() - 6);
 
     while (true) {
-      var endStr = windowEnd.toISOString().split('T')[0];
-      var startStr = windowStart.toISOString().split('T')[0];
+      var endStr = LL.toLocalDateStr(windowEnd);
+      var startStr = LL.toLocalDateStr(windowStart);
       var found = sorted.some(function(d) { return d >= startStr && d <= endStr; });
       if (found) {
         streak++;
@@ -145,7 +145,7 @@ function calculateStreak(checkDates, frequency) {
   } else {
     var yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    var yesterdayStr = yesterday.toISOString().split('T')[0];
+    var yesterdayStr = LL.toLocalDateStr(yesterday);
     if (sorted.indexOf(yesterdayStr) !== -1) {
       streak = 1;
       checkDate = new Date(yesterday);
@@ -156,7 +156,7 @@ function calculateStreak(checkDates, frequency) {
   }
 
   while (true) {
-    var ds = checkDate.toISOString().split('T')[0];
+    var ds = LL.toLocalDateStr(checkDate);
     if (sorted.indexOf(ds) !== -1) {
       streak++;
       checkDate.setDate(checkDate.getDate() - 1);
@@ -177,7 +177,7 @@ function buildLast30Days(checkDates) {
   for (var d = 29; d >= 0; d--) {
     var dd = new Date(today);
     dd.setDate(dd.getDate() - d);
-    var dateStr = dd.toISOString().split('T')[0];
+    var dateStr = LL.toLocalDateStr(dd);
     var isDone = dates.indexOf(dateStr) !== -1;
     var cls = 'habit-check';
     if (isDone) cls += ' done';

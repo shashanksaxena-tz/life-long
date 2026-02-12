@@ -5,6 +5,14 @@
 var LL = (function() {
   'use strict';
 
+  // --- Local YYYY-MM-DD (avoids UTC shift from toISOString) ---
+  function toLocalDateStr(d) {
+    var y = d.getFullYear();
+    var m = ('0' + (d.getMonth() + 1)).slice(-2);
+    var day = ('0' + d.getDate()).slice(-2);
+    return y + '-' + m + '-' + day;
+  }
+
   // --- Date formatting ---
   function formatDate(dateStr) {
     if (!dateStr) return '';
@@ -334,7 +342,7 @@ var LL = (function() {
 
     var today = new Date();
     today.setHours(0, 0, 0, 0);
-    var todayStr = today.toISOString().split('T')[0];
+    var todayStr = toLocalDateStr(today);
 
     var current = 0;
     var checkDate = new Date(today);
@@ -344,7 +352,7 @@ var LL = (function() {
     } else {
       var yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
-      var yesterdayStr = yesterday.toISOString().split('T')[0];
+      var yesterdayStr = toLocalDateStr(yesterday);
       if (uniqueDates.indexOf(yesterdayStr) !== -1) {
         current = 1;
         checkDate = new Date(yesterday);
@@ -354,7 +362,7 @@ var LL = (function() {
 
     if (current > 0) {
       while (true) {
-        var ds = checkDate.toISOString().split('T')[0];
+        var ds = toLocalDateStr(checkDate);
         if (uniqueDates.indexOf(ds) !== -1) {
           current++;
           checkDate.setDate(checkDate.getDate() - 1);
@@ -384,7 +392,7 @@ var LL = (function() {
     for (var d = 29; d >= 0; d--) {
       var dd = new Date(today);
       dd.setDate(dd.getDate() - d);
-      var dateStr = dd.toISOString().split('T')[0];
+      var dateStr = toLocalDateStr(dd);
       last30.push({
         date: dateStr,
         active: uniqueDates.indexOf(dateStr) !== -1,
@@ -399,7 +407,7 @@ var LL = (function() {
   function buildActivityHeatmap(logs, tasks) {
     var today = new Date();
     today.setHours(0, 0, 0, 0);
-    var todayStr = today.toISOString().split('T')[0];
+    var todayStr = toLocalDateStr(today);
 
     var activityMap = {};
     (logs || []).forEach(function(l) {
@@ -417,7 +425,7 @@ var LL = (function() {
     startDate.setDate(startDate.getDate() - dayOfWeek);
 
     for (var d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
-      var ds = d.toISOString().split('T')[0];
+      var ds = toLocalDateStr(d);
       var count = activityMap[ds] || 0;
       var level = '';
       if (count >= 4) level = 'l4';
@@ -664,6 +672,7 @@ var LL = (function() {
   }
 
   return {
+    toLocalDateStr: toLocalDateStr,
     formatDate: formatDate,
     formatDateLong: formatDateLong,
     getDayOfWeek: getDayOfWeek,

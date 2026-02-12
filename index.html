@@ -304,7 +304,7 @@ function renderBurndownChart(data) {
   for (var d = 29; d >= 0; d--) {
     var date = new Date(today);
     date.setDate(date.getDate() - d);
-    var dateStr = date.toISOString().split('T')[0];
+    var dateStr = LL.toLocalDateStr(date);
     labels.push(dateStr);
 
     var dayCompleted = 0;
