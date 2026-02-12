@@ -36,6 +36,21 @@
 
   function invalidateCache() { cachedData = null; }
 
+  // Re-fetch data and re-render the current page after an action
+  function triggerPageRefresh() {
+    // Each page defines its own global load function — call whichever exists
+    var loaders = [
+      'loadDashboard', 'loadProjects', 'loadTasks',
+      'loadGoals', 'loadLogs', 'loadIdeas', 'loadHabits'
+    ];
+    for (var i = 0; i < loaders.length; i++) {
+      if (typeof window[loaders[i]] === 'function') {
+        window[loaders[i]]();
+        return;
+      }
+    }
+  }
+
   async function createGitHubIssue(title, body) {
     var info = getRepoInfo();
     if (!info.token) { showToast('Set your GitHub token in Settings first.', 'error'); showSettingsModal(); throw new Error('No token configured'); }
@@ -198,6 +213,7 @@
       var issue = await createGitHubIssue(title, bodyText);
       closeModal(); invalidateCache();
       showToast(entityName + ' submitted! <a href="' + issue.html_url + '" target="_blank">Issue #' + issue.number + '</a> &mdash; site updates in ~2 min.', 'success');
+      triggerPageRefresh();
     } catch(e) { showToast('Failed: ' + e.message, 'error'); btn.disabled = false; btn.textContent = originalText; }
   }
 
@@ -212,6 +228,7 @@
       btnEl.style.color = 'var(--accent-green)';
       showToast(entityName + ' <a href="' + issue.html_url + '" target="_blank">#' + issue.number + '</a>', 'success');
       setTimeout(function() { btnEl.textContent = origText; btnEl.disabled = false; btnEl.style.color = ''; }, 2000);
+      triggerPageRefresh();
     } catch(e) { showToast('Failed: ' + e.message, 'error'); btnEl.disabled = false; btnEl.textContent = origText; }
   }
 
@@ -707,6 +724,27 @@
       '### Habit ID\n\n' + habitId + '\n\n### Check Date\n\n' + today,
       'Habit checked in'
     );
+  };
+
+  // Auto-complete a goal when all linked tasks are done
+  window.llQuickGoalComplete = function(goal) {
+    var body = '### Goal Title\n\n' + (goal.title || goal.id) + '\n\n### Status\n\n' + 'completed';
+    if (goal.target_date) body += '\n\n### Target Date\n\n' + goal.target_date;
+    if (goal.linked_tasks && goal.linked_tasks.length) body += '\n\n### Linked Tasks\n\n' + goal.linked_tasks.join(', ');
+    if (goal.tags && goal.tags.length) body += '\n\n### Tags\n\n' + goal.tags.join(', ');
+    if (goal.body) body += '\n\n### Description\n\n' + goal.body;
+
+    var info = getRepoInfo();
+    if (!info.token) return; // Can't auto-complete without token
+
+    createGitHubIssue('Update Goal: ' + (goal.title || goal.id), body)
+      .then(function(issue) {
+        invalidateCache();
+        showToast('Goal "' + (goal.title || goal.id) + '" auto-completed! All linked tasks are done. <a href="' + issue.html_url + '" target="_blank">#' + issue.number + '</a>', 'success');
+      })
+      .catch(function() {
+        // Silently fail — user can manually complete
+      });
   };
 
   // Expose action HTML builders so pages can use them

@@ -196,6 +196,16 @@
 <script src="utils.js"></script>
 <script>
 var dashboardData = null;
+var dashboardCharts = {};
+
+function destroyDashboardCharts() {
+  Object.keys(dashboardCharts).forEach(function(key) {
+    if (dashboardCharts[key]) {
+      dashboardCharts[key].destroy();
+      delete dashboardCharts[key];
+    }
+  });
+}
 
 function exportDashboard(format) {
   if (!dashboardData) return;
@@ -314,7 +324,7 @@ function renderBurndownChart(data) {
   }
 
   var ctx = document.getElementById('burndownChart').getContext('2d');
-  new Chart(ctx, {
+  dashboardCharts.burndown = new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels.map(function(l) {
@@ -490,6 +500,7 @@ function renderTimeline(data) {
 }
 
 async function loadDashboard() {
+  destroyDashboardCharts();
   try {
     var res = await fetch('data/index.json?t=' + Date.now());
     var data = await res.json();
@@ -546,7 +557,7 @@ async function loadDashboard() {
 
     // Task pie chart
     var taskCtx = document.getElementById('taskPieChart').getContext('2d');
-    new Chart(taskCtx, {
+    dashboardCharts.taskPie = new Chart(taskCtx, {
       type: 'doughnut',
       data: {
         labels: ['Done', 'In Progress', 'Todo'],
@@ -594,7 +605,7 @@ async function loadDashboard() {
     var projectColors = projectLabels.map(function(l) { return statusColors[l.toLowerCase()] || textMuted || '#8b949e'; });
 
     var projCtx = document.getElementById('projectBarChart').getContext('2d');
-    new Chart(projCtx, {
+    dashboardCharts.projectBar = new Chart(projCtx, {
       type: 'bar',
       data: {
         labels: projectLabels.map(function(l) { return l.charAt(0).toUpperCase() + l.slice(1); }),

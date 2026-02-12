@@ -107,6 +107,33 @@ function getGoalTaskCounts(goal) {
   return { total: total, done: done };
 }
 
+// Auto-complete goals when all linked tasks are done
+function checkGoalAutoComplete() {
+  allGoals.forEach(function(goal) {
+    if (goal.status === 'completed' || goal.status === 'archived') return;
+    var counts = getGoalTaskCounts(goal);
+    if (counts.total > 0 && counts.done === counts.total) {
+      var goalCard = document.querySelector('.goal-card .goal-title');
+      var msg = 'All ' + counts.total + ' tasks for "' + (goal.title || goal.id) + '" are done! Marking goal as completed...';
+      if (window.llQuickGoalComplete) {
+        window.llQuickGoalComplete(goal);
+      }
+      // Show visual indicator
+      var cards = document.querySelectorAll('.goal-card');
+      cards.forEach(function(card) {
+        var titleEl = card.querySelector('.goal-title');
+        if (titleEl && titleEl.textContent === (goal.title || goal.id)) {
+          var badge = card.querySelector('.badge');
+          if (badge && badge.textContent !== 'completed') {
+            badge.textContent = 'completed';
+            badge.className = 'badge ' + LL.badgeClass('completed');
+          }
+        }
+      });
+    }
+  });
+}
+
 function toggleGoalBody(el) {
   var body = el.querySelector('.goal-body');
   if (body) body.classList.toggle('open');
@@ -174,6 +201,9 @@ async function loadGoals() {
     document.getElementById('status-filters').innerHTML = filtersHtml;
 
     applyFilters();
+
+    // Check if any goals should be auto-completed
+    checkGoalAutoComplete();
   } catch (err) {
     document.getElementById('goals-list').innerHTML = '<div class="empty-state" style="color:var(--accent-red)">Failed to load data. Make sure data/index.json exists.</div>';
     console.error('Failed to load goals:', err);
