@@ -226,6 +226,7 @@ function renderProjects(filter) {
           '<h4>Recent Activity</h4>' +
           timelineHtml +
         '</div>' +
+        (window.llProjectActions ? window.llProjectActions(p.id) : '') +
       '</div>' +
     '</div>';
   }).join('');

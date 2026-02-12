@@ -119,6 +119,7 @@ function renderIdeas(ideas) {
         '<span class="badge ' + LL.badgeClass(idea.status || 'raw') + '">' + (idea.status || 'raw') + '</span>' +
         tags +
       '</div>' +
+      (window.llIdeaActions ? window.llIdeaActions(idea.id) : '') +
     '</div>';
   }).join('');
 }

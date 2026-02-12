@@ -34,6 +34,8 @@
     } catch(e) { return null; }
   }
 
+  function invalidateCache() { cachedData = null; }
+
   async function createGitHubIssue(title, body) {
     var info = getRepoInfo();
     if (!info.token) { showToast('Set your GitHub token in Settings first.', 'error'); showSettingsModal(); throw new Error('No token configured'); }
@@ -80,9 +82,9 @@
       '.ll-form-group{margin-bottom:1.15rem}',
       '.ll-form-group label{display:block;font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.4rem;font-weight:500}',
       '.ll-hint{font-size:0.75rem;color:var(--text-muted);margin-bottom:0.4rem}',
-      '.ll-input,.ll-textarea,.ll-select{width:100%;background:var(--bg-input);color:var(--text-secondary);border:1px solid var(--border-primary);border-radius:10px;padding:0.6rem 0.85rem;font-size:0.9rem;font-family:inherit;transition:all 0.2s cubic-bezier(0.4,0,0.2,1)}',
+      '.ll-input,.ll-textarea,.ll-select{width:100%;background:var(--bg-input);color:var(--text-secondary);border:1px solid var(--border-primary);border-radius:10px;padding:0.6rem 0.85rem;font-size:0.9rem;font-family:inherit;transition:all 0.2s cubic-bezier(0.4,0,0.2,1);box-sizing:border-box}',
       '.ll-input:focus,.ll-textarea:focus,.ll-select:focus{border-color:var(--accent-blue);outline:none;box-shadow:0 0 0 3px var(--accent-blue-dim)}',
-      '.ll-textarea{min-height:80px;resize:vertical}',
+      '.ll-textarea{min-height:120px;resize:vertical;line-height:1.6}',
       '.ll-select{cursor:pointer}',
       '.ll-btn{padding:0.55rem 1.1rem;border-radius:10px;font-size:0.9rem;font-weight:500;cursor:pointer;border:none;transition:all 0.2s cubic-bezier(0.4,0,0.2,1);font-family:inherit}',
       '.ll-btn:active{transform:scale(0.97)}',
@@ -91,6 +93,8 @@
       '.ll-btn-submit:disabled{opacity:0.5;cursor:not-allowed;box-shadow:none}',
       '.ll-btn-cancel{background:var(--bg-tertiary);color:var(--text-secondary);box-shadow:var(--shadow-sm)}',
       '.ll-btn-cancel:hover{background:var(--border-primary);color:var(--text-primary)}',
+      '.ll-btn-danger{background:rgba(239,68,68,0.1);color:var(--accent-red);box-shadow:none}',
+      '.ll-btn-danger:hover{background:var(--accent-red);color:#fff}',
       '.ll-form-actions{display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border-secondary)}',
       '.ll-toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:0.85rem 1.25rem;border-radius:12px;font-size:0.9rem;z-index:2000;max-width:420px;animation:ll-fadein 0.3s cubic-bezier(0.4,0,0.2,1);border:none}',
       '.ll-toast-success{background:var(--accent-green);color:#fff;box-shadow:0 8px 24px rgba(34,197,94,0.3)}',
@@ -100,7 +104,21 @@
       '@keyframes ll-fadein{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}',
       '.ll-token-toggle{background:var(--bg-tertiary);border:none;color:var(--text-muted);border-radius:6px;padding:0.2rem 0.5rem;cursor:pointer;font-size:0.75rem;margin-left:0.5rem;transition:all 0.15s}',
       '.ll-token-toggle:hover{color:var(--text-secondary);background:var(--border-primary)}',
-      '@media(max-width:768px){.ll-nav-actions{margin-left:0;margin-top:0.5rem}.ll-modal{width:95%;max-height:90vh;border-radius:12px}.ll-tabs{padding:0 0.75rem}.ll-tab{padding:0.5rem 0.6rem;font-size:0.8rem}}'
+      // Inline action buttons on cards
+      '.ll-card-actions{display:flex;gap:0.35rem;margin-top:0.65rem;padding-top:0.65rem;border-top:1px solid var(--border-secondary);flex-wrap:wrap}',
+      '.ll-card-btn{background:var(--bg-tertiary);color:var(--text-muted);border:none;padding:0.3rem 0.65rem;border-radius:8px;cursor:pointer;font-size:0.75rem;font-weight:500;transition:all 0.15s cubic-bezier(0.4,0,0.2,1);font-family:inherit;display:inline-flex;align-items:center;gap:0.3rem;white-space:nowrap}',
+      '.ll-card-btn:hover{background:var(--accent-blue-dim);color:var(--accent-blue);transform:translateY(-1px)}',
+      '.ll-card-btn:active{transform:scale(0.95)}',
+      '.ll-card-btn.btn-done{color:var(--accent-green-text)}',
+      '.ll-card-btn.btn-done:hover{background:rgba(34,197,94,0.15);color:var(--accent-green)}',
+      '.ll-card-btn.btn-check{background:var(--accent-green);color:#fff;box-shadow:0 1px 4px rgba(34,197,94,0.2)}',
+      '.ll-card-btn.btn-check:hover{box-shadow:0 2px 8px rgba(34,197,94,0.3);background:var(--accent-green-hover)}',
+      '.ll-card-btn.btn-check.checked{background:var(--bg-tertiary);color:var(--text-muted)}',
+      '.ll-quick-row{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap}',
+      '.ll-quick-select{background:var(--bg-tertiary);color:var(--text-secondary);border:1px solid var(--border-primary);border-radius:8px;padding:0.3rem 0.5rem;font-size:0.75rem;font-family:inherit;cursor:pointer}',
+      // Relative time badge
+      '.ll-relative-time{font-size:0.78rem;color:var(--text-muted)}',
+      '@media(max-width:768px){.ll-nav-actions{margin-left:0;margin-top:0.5rem}.ll-modal{width:95%;max-height:90vh;border-radius:12px}.ll-tabs{padding:0 0.75rem}.ll-tab{padding:0.5rem 0.6rem;font-size:0.8rem}.ll-card-actions{gap:0.25rem}.ll-card-btn{font-size:0.7rem;padding:0.25rem 0.5rem}}'
     ].join('\n');
     document.head.appendChild(style);
   }
@@ -178,13 +196,31 @@
     btn.disabled = true; btn.textContent = 'Submitting...';
     try {
       var issue = await createGitHubIssue(title, bodyText);
-      closeModal(); cachedData = null;
+      closeModal(); invalidateCache();
       showToast(entityName + ' submitted! <a href="' + issue.html_url + '" target="_blank">Issue #' + issue.number + '</a> &mdash; site updates in ~2 min.', 'success');
     } catch(e) { showToast('Failed: ' + e.message, 'error'); btn.disabled = false; btn.textContent = originalText; }
   }
 
+  // --- Quick inline action (no modal, just creates issue directly) ---
+  async function quickAction(btnEl, title, bodyText, entityName) {
+    var origText = btnEl.textContent;
+    btnEl.disabled = true; btnEl.textContent = '...';
+    try {
+      var issue = await createGitHubIssue(title, bodyText);
+      invalidateCache();
+      btnEl.textContent = '\u2713';
+      btnEl.style.color = 'var(--accent-green)';
+      showToast(entityName + ' <a href="' + issue.html_url + '" target="_blank">#' + issue.number + '</a>', 'success');
+      setTimeout(function() { btnEl.textContent = origText; btnEl.disabled = false; btnEl.style.color = ''; }, 2000);
+    } catch(e) { showToast('Failed: ' + e.message, 'error'); btnEl.disabled = false; btnEl.textContent = origText; }
+  }
+
+  // =========================================
+  // CREATE FORMS (new entities)
+  // =========================================
+
   function renderProjectForm(c) {
-    c.innerHTML = '<div class="ll-form-group"><label>Project Name *</label><input class="ll-input" id="ll-f-name" placeholder="e.g. Analytics Engine"></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. frontend, data"></div><div class="ll-form-group"><label>Description</label><textarea class="ll-textarea" id="ll-f-desc" placeholder="What is this project about?"></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Project</button></div>';
+    c.innerHTML = '<div class="ll-form-group"><label>Project Name *</label><input class="ll-input" id="ll-f-name" placeholder="e.g. Analytics Engine"></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. frontend, data"></div><div class="ll-form-group"><label>Description (Markdown)</label><textarea class="ll-textarea" id="ll-f-desc" placeholder="## Description\nWhat is this project about?\n\n## Goals\n- Goal 1\n- Goal 2"></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Project</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var name = c.querySelector('#ll-f-name').value.trim(); if (!name) { showToast('Project name is required.', 'error'); return; }
@@ -199,14 +235,16 @@
   function renderTaskForm(c, data) {
     var opts = '<option value="">Select a project...</option>';
     if (data && data.projects) data.projects.forEach(function(p) { opts += '<option value="' + escapeHtml(p.id) + '">' + escapeHtml(p.name || p.id) + '</option>'; });
-    c.innerHTML = '<div class="ll-form-group"><label>Task Title *</label><input class="ll-input" id="ll-f-title" placeholder="e.g. Fix OAuth redirect bug"></div><div class="ll-form-group"><label>Project *</label><select class="ll-select" id="ll-f-project">' + opts + '</select></div><div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Priority</label><select class="ll-select" id="ll-f-priority"><option value="">None</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option></select></div><div class="ll-form-group" style="flex:1"><label>Due Date</label><input type="date" class="ll-input" id="ll-f-due"></div></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. bug, backend"></div><div class="ll-form-group"><label>Description</label><textarea class="ll-textarea" id="ll-f-desc" placeholder="What needs to be done?"></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Task</button></div>';
+    c.innerHTML = '<div class="ll-form-group"><label>Task Title *</label><input class="ll-input" id="ll-f-title" placeholder="e.g. Fix OAuth redirect bug"></div><div class="ll-form-group"><label>Project *</label><select class="ll-select" id="ll-f-project">' + opts + '</select></div><div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Priority</label><select class="ll-select" id="ll-f-priority"><option value="">None</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option></select></div><div class="ll-form-group" style="flex:1"><label>Due Date</label><input type="date" class="ll-input" id="ll-f-due"></div></div><div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Blocked By</label><div class="ll-hint">Task ID that blocks this</div><input class="ll-input" id="ll-f-blocked" placeholder="e.g. task-2026-003"></div><div class="ll-form-group" style="flex:1"><label>Time Spent</label><input class="ll-input" id="ll-f-time" placeholder="e.g. 2h, 30m"></div></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. bug, backend"></div><div class="ll-form-group"><label>Description (Markdown)</label><textarea class="ll-textarea" id="ll-f-desc" placeholder="## What needs to be done?\n\n- [ ] Step 1\n- [ ] Step 2"></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Task</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var taskTitle = c.querySelector('#ll-f-title').value.trim(), project = c.querySelector('#ll-f-project').value;
       if (!taskTitle) { showToast('Task title is required.', 'error'); return; } if (!project) { showToast('Please select a project.', 'error'); return; }
       var tags = c.querySelector('#ll-f-tags').value.trim(), desc = c.querySelector('#ll-f-desc').value.trim(), priority = c.querySelector('#ll-f-priority').value, due = c.querySelector('#ll-f-due').value;
+      var blocked = c.querySelector('#ll-f-blocked').value.trim(), time = c.querySelector('#ll-f-time').value.trim();
       var title = 'Create Task: ' + taskTitle, body = '### Task Title\n\n' + taskTitle + '\n\n### Project\n\n' + project;
       if (priority) body += '\n\n### Priority\n\n' + priority; if (due) body += '\n\n### Due Date\n\n' + due;
+      if (blocked) body += '\n\n### Blocked By\n\n' + blocked; if (time) body += '\n\n### Time Spent\n\n' + time;
       if (tags) body += '\n\n### Tags\n\n' + tags; if (desc) body += '\n\n### Description\n\n' + desc;
       submitForm(this, 'Create Task', title, body, 'Task');
     });
@@ -214,22 +252,25 @@
   }
 
   function renderLogForm(c) {
-    c.innerHTML = '<div class="ll-form-group"><label>Summary *</label><input class="ll-input" id="ll-f-summary" placeholder="e.g. Worked on auth fixes and dashboard UI"></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Add Log Entry</button></div>';
+    c.innerHTML = '<div class="ll-form-group"><label>Log Entry (Markdown) *</label><textarea class="ll-textarea" id="ll-f-body" style="min-height:180px" placeholder="## Daily Log\n\n### What I did today\n- Worked on...\n- Fixed...\n\n### Blockers\n- None\n\n### Notes\n> Some insight"></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Add Log Entry</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
-      var summary = c.querySelector('#ll-f-summary').value.trim(); if (!summary) { showToast('Summary is required.', 'error'); return; }
-      submitForm(this, 'Add Log Entry', 'Add Log: ' + summary, '### Summary\n\n' + summary, 'Log entry');
+      var body = c.querySelector('#ll-f-body').value.trim(); if (!body) { showToast('Log body is required.', 'error'); return; }
+      var summary = body.split('\n').find(function(l) { return l.trim(); }) || 'Log entry';
+      summary = summary.replace(/^#+\s*/, '').substring(0, 60);
+      submitForm(this, 'Add Log Entry', 'Add Log: ' + summary, '### Summary\n\n' + body, 'Log entry');
     });
-    c.querySelector('#ll-f-summary').focus();
+    c.querySelector('#ll-f-body').focus();
   }
 
   function renderIdeaForm(c) {
-    c.innerHTML = '<div class="ll-form-group"><label>Idea *</label><textarea class="ll-textarea" id="ll-f-idea" placeholder="Describe your idea..."></textarea></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. product, automation"></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Add Idea</button></div>';
+    c.innerHTML = '<div class="ll-form-group"><label>Idea (Markdown) *</label><textarea class="ll-textarea" id="ll-f-idea" style="min-height:150px" placeholder="## My Idea\n\nDescribe your idea in detail...\n\n### Technical Approach\n- Step 1\n- Step 2"></textarea></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. product, automation"></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Add Idea</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var idea = c.querySelector('#ll-f-idea').value.trim(); if (!idea) { showToast('Idea text is required.', 'error'); return; }
       var tags = c.querySelector('#ll-f-tags').value.trim();
-      var shortTitle = idea.length > 60 ? idea.substring(0, 60) + '...' : idea;
+      var shortTitle = idea.split('\n').find(function(l) { return l.trim(); }) || idea;
+      shortTitle = shortTitle.replace(/^#+\s*/, '').substring(0, 60);
       var body = '### Idea\n\n' + idea; if (tags) body += '\n\n### Tags\n\n' + tags;
       submitForm(this, 'Add Idea', 'Add Idea: ' + shortTitle, body, 'Idea');
     });
@@ -237,7 +278,7 @@
   }
 
   function renderGoalForm(c) {
-    c.innerHTML = '<div class="ll-form-group"><label>Goal Title *</label><input class="ll-input" id="ll-f-title" placeholder="e.g. Ship Auth Service by March"></div><div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Target Date</label><input type="date" class="ll-input" id="ll-f-target"></div></div><div class="ll-form-group"><label>Linked Tasks</label><div class="ll-hint">Comma-separated task IDs (e.g. task-2026-001, task-2026-002)</div><input class="ll-input" id="ll-f-tasks" placeholder="e.g. task-2026-001, task-2026-002"></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. backend, Q1"></div><div class="ll-form-group"><label>Description</label><textarea class="ll-textarea" id="ll-f-desc" placeholder="What does this goal entail?"></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Goal</button></div>';
+    c.innerHTML = '<div class="ll-form-group"><label>Goal Title *</label><input class="ll-input" id="ll-f-title" placeholder="e.g. Ship Auth Service by March"></div><div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Target Date</label><input type="date" class="ll-input" id="ll-f-target"></div></div><div class="ll-form-group"><label>Linked Tasks</label><div class="ll-hint">Comma-separated task IDs (e.g. task-2026-001, task-2026-002)</div><input class="ll-input" id="ll-f-tasks" placeholder="e.g. task-2026-001, task-2026-002"></div><div class="ll-form-group"><label>Tags</label><div class="ll-hint">Comma-separated</div><input class="ll-input" id="ll-f-tags" placeholder="e.g. backend, Q1"></div><div class="ll-form-group"><label>Description (Markdown)</label><textarea class="ll-textarea" id="ll-f-desc" placeholder="## Objective\nWhat does this goal entail?\n\n## Key Results\n1. Result 1\n2. Result 2"></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Create Goal</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var title = c.querySelector('#ll-f-title').value.trim(); if (!title) { showToast('Goal title is required.', 'error'); return; }
@@ -268,14 +309,354 @@
   function renderUpdateForm(c, data) {
     var opts = '<option value="">Select a task...</option>';
     if (data && data.tasks) data.tasks.forEach(function(t) { opts += '<option value="' + escapeHtml(t.id) + '">' + escapeHtml(t.id + ': ' + (t.title || '') + ' [' + (t.status || 'todo') + ']') + '</option>'; });
-    c.innerHTML = '<div class="ll-form-group"><label>Task *</label><select class="ll-select" id="ll-f-taskid">' + opts + '</select></div><div class="ll-form-group"><label>New Status *</label><select class="ll-select" id="ll-f-status"><option value="">Select status...</option><option value="todo">Todo</option><option value="in-progress">In Progress</option><option value="done">Done</option></select></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Update Task</button></div>';
+    c.innerHTML = '<div class="ll-form-group"><label>Task *</label><select class="ll-select" id="ll-f-taskid">' + opts + '</select></div><div class="ll-form-group"><label>New Status *</label><select class="ll-select" id="ll-f-status"><option value="">Select status...</option><option value="todo">Todo</option><option value="in-progress">In Progress</option><option value="done">Done</option></select></div><div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Time Spent</label><input class="ll-input" id="ll-f-time" placeholder="e.g. 2h"></div><div class="ll-form-group" style="flex:1"><label>Blocked By</label><input class="ll-input" id="ll-f-blocked" placeholder="e.g. task-2026-003"></div></div><div class="ll-form-group"><label>Comment</label><textarea class="ll-textarea" id="ll-f-comment" placeholder="Any notes about this update..."></textarea></div><div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Update Task</button></div>';
     c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
     c.querySelector('#ll-f-submit').addEventListener('click', function() {
       var taskId = c.querySelector('#ll-f-taskid').value, status = c.querySelector('#ll-f-status').value;
       if (!taskId) { showToast('Please select a task.', 'error'); return; } if (!status) { showToast('Please select a status.', 'error'); return; }
-      submitForm(this, 'Update Task', 'Update Task: ' + taskId, '### Task ID\n\n' + taskId + '\n\n### New Status\n\n' + status, 'Task update');
+      var time = c.querySelector('#ll-f-time').value.trim(), blocked = c.querySelector('#ll-f-blocked').value.trim(), comment = c.querySelector('#ll-f-comment').value.trim();
+      var body = '### Task ID\n\n' + taskId + '\n\n### New Status\n\n' + status;
+      if (time) body += '\n\n### Time Spent\n\n' + time;
+      if (blocked) body += '\n\n### Blocked By\n\n' + blocked;
+      if (comment) body += '\n\n### Comment\n\n' + comment;
+      submitForm(this, 'Update Task', 'Update Task: ' + taskId, body, 'Task update');
     });
   }
+
+  // =========================================
+  // EDIT FORMS (pre-filled for existing entities)
+  // =========================================
+
+  function showEditTaskModal(task) {
+    var modal = createModal('Edit Task');
+    var c = document.createElement('div');
+    c.className = 'll-modal-body';
+    modal.appendChild(c);
+
+    var statusOptions = ['todo', 'in-progress', 'done'].map(function(s) {
+      return '<option value="' + s + '"' + (task.status === s ? ' selected' : '') + '>' + s + '</option>';
+    }).join('');
+    var priorityOptions = ['', 'low', 'medium', 'high', 'critical'].map(function(p) {
+      return '<option value="' + p + '"' + ((task.priority || '') === p ? ' selected' : '') + '>' + (p || 'None') + '</option>';
+    }).join('');
+
+    c.innerHTML =
+      '<div class="ll-form-group"><label>Task: ' + escapeHtml(task.title || task.id) + '</label><div class="ll-hint">ID: ' + escapeHtml(task.id) + '</div></div>' +
+      '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Status *</label><select class="ll-select" id="ll-f-status">' + statusOptions + '</select></div><div class="ll-form-group" style="flex:1"><label>Priority</label><select class="ll-select" id="ll-f-priority">' + priorityOptions + '</select></div></div>' +
+      '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Due Date</label><input type="date" class="ll-input" id="ll-f-due" value="' + escapeHtml(task.due || '') + '"></div><div class="ll-form-group" style="flex:1"><label>Time Spent</label><input class="ll-input" id="ll-f-time" value="' + escapeHtml(task.time_spent || '') + '" placeholder="e.g. 4h"></div></div>' +
+      '<div class="ll-form-group"><label>Blocked By</label><div class="ll-hint">Task ID that blocks this task</div><input class="ll-input" id="ll-f-blocked" value="' + escapeHtml(task.blocked_by || '') + '" placeholder="e.g. task-2026-003"></div>' +
+      '<div class="ll-form-group"><label>Description (Markdown)</label><textarea class="ll-textarea" id="ll-f-desc" style="min-height:150px">' + escapeHtml(task.body || '') + '</textarea></div>' +
+      '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Save Changes</button></div>';
+
+    c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
+    c.querySelector('#ll-f-submit').addEventListener('click', function() {
+      var status = c.querySelector('#ll-f-status').value;
+      var priority = c.querySelector('#ll-f-priority').value;
+      var due = c.querySelector('#ll-f-due').value;
+      var time = c.querySelector('#ll-f-time').value.trim();
+      var blocked = c.querySelector('#ll-f-blocked').value.trim();
+      var desc = c.querySelector('#ll-f-desc').value.trim();
+
+      var body = '### Task ID\n\n' + task.id + '\n\n### New Status\n\n' + status;
+      if (priority) body += '\n\n### Priority\n\n' + priority;
+      if (due) body += '\n\n### Due Date\n\n' + due;
+      if (time) body += '\n\n### Time Spent\n\n' + time;
+      if (blocked) body += '\n\n### Blocked By\n\n' + blocked;
+      if (desc) body += '\n\n### Description\n\n' + desc;
+      submitForm(this, 'Save Changes', 'Update Task: ' + task.id, body, 'Task update');
+    });
+  }
+
+  function showEditProjectModal(project) {
+    var modal = createModal('Edit Project');
+    var c = document.createElement('div');
+    c.className = 'll-modal-body';
+    modal.appendChild(c);
+
+    var statusOptions = ['active', 'planning', 'done', 'archived'].map(function(s) {
+      return '<option value="' + s + '"' + (project.status === s ? ' selected' : '') + '>' + s + '</option>';
+    }).join('');
+
+    c.innerHTML =
+      '<div class="ll-form-group"><label>Project: ' + escapeHtml(project.name || project.id) + '</label></div>' +
+      '<div class="ll-form-group"><label>Status</label><select class="ll-select" id="ll-f-status">' + statusOptions + '</select></div>' +
+      '<div class="ll-form-group"><label>Tags</label><input class="ll-input" id="ll-f-tags" value="' + escapeHtml((project.tags || []).join(', ')) + '"></div>' +
+      '<div class="ll-form-group"><label>Description (Markdown)</label><textarea class="ll-textarea" id="ll-f-desc" style="min-height:180px">' + escapeHtml(project.body || '') + '</textarea></div>' +
+      '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Save Changes</button></div>';
+
+    c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
+    c.querySelector('#ll-f-submit').addEventListener('click', function() {
+      var status = c.querySelector('#ll-f-status').value;
+      var tags = c.querySelector('#ll-f-tags').value.trim();
+      var desc = c.querySelector('#ll-f-desc').value.trim();
+      var body = '### Project Name\n\n' + (project.name || project.id) + '\n\n### Status\n\n' + status;
+      if (tags) body += '\n\n### Tags\n\n' + tags;
+      if (desc) body += '\n\n### Description\n\n' + desc;
+      submitForm(this, 'Save Changes', 'Update Project: ' + (project.name || project.id), body, 'Project update');
+    });
+  }
+
+  function showEditIdeaModal(idea) {
+    var modal = createModal('Edit Idea');
+    var c = document.createElement('div');
+    c.className = 'll-modal-body';
+    modal.appendChild(c);
+
+    var statusOptions = ['raw', 'exploring', 'planning', 'archived'].map(function(s) {
+      return '<option value="' + s + '"' + ((idea.status || 'raw') === s ? ' selected' : '') + '>' + s + '</option>';
+    }).join('');
+
+    c.innerHTML =
+      '<div class="ll-form-group"><label>Status</label><select class="ll-select" id="ll-f-status">' + statusOptions + '</select></div>' +
+      '<div class="ll-form-group"><label>Tags</label><input class="ll-input" id="ll-f-tags" value="' + escapeHtml((idea.tags || []).join(', ')) + '"></div>' +
+      '<div class="ll-form-group"><label>Idea Body (Markdown)</label><textarea class="ll-textarea" id="ll-f-body" style="min-height:200px">' + escapeHtml(idea.body || '') + '</textarea></div>' +
+      '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Save Changes</button></div>';
+
+    c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
+    c.querySelector('#ll-f-submit').addEventListener('click', function() {
+      var status = c.querySelector('#ll-f-status').value;
+      var tags = c.querySelector('#ll-f-tags').value.trim();
+      var bodyText = c.querySelector('#ll-f-body').value.trim();
+      var shortTitle = bodyText.split('\n').find(function(l) { return l.trim(); }) || 'idea';
+      shortTitle = shortTitle.replace(/^#+\s*/, '').substring(0, 60);
+      var issueBody = '### Idea\n\n' + bodyText + '\n\n### Status\n\n' + status;
+      if (tags) issueBody += '\n\n### Tags\n\n' + tags;
+      submitForm(this, 'Save Changes', 'Update Idea: ' + shortTitle, issueBody, 'Idea update');
+    });
+  }
+
+  function showEditGoalModal(goal) {
+    var modal = createModal('Edit Goal');
+    var c = document.createElement('div');
+    c.className = 'll-modal-body';
+    modal.appendChild(c);
+
+    var statusOptions = ['active', 'planning', 'completed', 'archived'].map(function(s) {
+      return '<option value="' + s + '"' + ((goal.status || 'active') === s ? ' selected' : '') + '>' + s + '</option>';
+    }).join('');
+
+    c.innerHTML =
+      '<div class="ll-form-group"><label>Goal: ' + escapeHtml(goal.title || goal.id) + '</label></div>' +
+      '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Status</label><select class="ll-select" id="ll-f-status">' + statusOptions + '</select></div><div class="ll-form-group" style="flex:1"><label>Target Date</label><input type="date" class="ll-input" id="ll-f-target" value="' + escapeHtml(goal.target_date || '') + '"></div></div>' +
+      '<div class="ll-form-group"><label>Linked Tasks</label><input class="ll-input" id="ll-f-tasks" value="' + escapeHtml((goal.linked_tasks || []).join(', ')) + '"></div>' +
+      '<div class="ll-form-group"><label>Tags</label><input class="ll-input" id="ll-f-tags" value="' + escapeHtml((goal.tags || []).join(', ')) + '"></div>' +
+      '<div class="ll-form-group"><label>Description (Markdown)</label><textarea class="ll-textarea" id="ll-f-desc" style="min-height:150px">' + escapeHtml(goal.body || '') + '</textarea></div>' +
+      '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Save Changes</button></div>';
+
+    c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
+    c.querySelector('#ll-f-submit').addEventListener('click', function() {
+      var status = c.querySelector('#ll-f-status').value;
+      var target = c.querySelector('#ll-f-target').value;
+      var tasks = c.querySelector('#ll-f-tasks').value.trim();
+      var tags = c.querySelector('#ll-f-tags').value.trim();
+      var desc = c.querySelector('#ll-f-desc').value.trim();
+      var body = '### Goal Title\n\n' + (goal.title || goal.id) + '\n\n### Status\n\n' + status;
+      if (target) body += '\n\n### Target Date\n\n' + target;
+      if (tasks) body += '\n\n### Linked Tasks\n\n' + tasks;
+      if (tags) body += '\n\n### Tags\n\n' + tags;
+      if (desc) body += '\n\n### Description\n\n' + desc;
+      submitForm(this, 'Save Changes', 'Update Goal: ' + (goal.title || goal.id), body, 'Goal update');
+    });
+  }
+
+  function showEditHabitModal(habit) {
+    var modal = createModal('Edit Habit');
+    var c = document.createElement('div');
+    c.className = 'll-modal-body';
+    modal.appendChild(c);
+
+    var freqOptions = ['daily', 'weekly'].map(function(f) {
+      return '<option value="' + f + '"' + ((habit.frequency || 'daily') === f ? ' selected' : '') + '>' + f + '</option>';
+    }).join('');
+    var statusOptions = ['active', 'paused', 'archived'].map(function(s) {
+      return '<option value="' + s + '"' + ((habit.status || 'active') === s ? ' selected' : '') + '>' + s + '</option>';
+    }).join('');
+
+    c.innerHTML =
+      '<div class="ll-form-group"><label>Habit: ' + escapeHtml(habit.name || habit.id) + '</label></div>' +
+      '<div style="display:flex;gap:0.75rem"><div class="ll-form-group" style="flex:1"><label>Frequency</label><select class="ll-select" id="ll-f-freq">' + freqOptions + '</select></div><div class="ll-form-group" style="flex:1"><label>Status</label><select class="ll-select" id="ll-f-status">' + statusOptions + '</select></div></div>' +
+      '<div class="ll-form-group"><label>Tags</label><input class="ll-input" id="ll-f-tags" value="' + escapeHtml((habit.tags || []).join(', ')) + '"></div>' +
+      '<div class="ll-form-actions"><button class="ll-btn ll-btn-cancel" id="ll-f-cancel">Cancel</button><button class="ll-btn ll-btn-submit" id="ll-f-submit">Save Changes</button></div>';
+
+    c.querySelector('#ll-f-cancel').addEventListener('click', closeModal);
+    c.querySelector('#ll-f-submit').addEventListener('click', function() {
+      var freq = c.querySelector('#ll-f-freq').value;
+      var status = c.querySelector('#ll-f-status').value;
+      var tags = c.querySelector('#ll-f-tags').value.trim();
+      var body = '### Name\n\n' + (habit.name || habit.id) + '\n\n### Frequency\n\n' + freq + '\n\n### Status\n\n' + status;
+      if (tags) body += '\n\n### Tags\n\n' + tags;
+      submitForm(this, 'Save Changes', 'Update Habit: ' + (habit.name || habit.id), body, 'Habit update');
+    });
+  }
+
+  // =========================================
+  // INLINE CARD ACTION HTML BUILDERS
+  // These return HTML strings to inject into cards
+  // =========================================
+
+  function taskActionsHTML(taskId) {
+    return '<div class="ll-card-actions">' +
+      '<button class="ll-card-btn" onclick="event.stopPropagation();window.llEditTask(\'' + taskId + '\')">&#9998; Edit</button>' +
+      '<button class="ll-card-btn btn-done" onclick="event.stopPropagation();window.llQuickStatus(\'' + taskId + '\',\'done\',this)">&#10003; Done</button>' +
+      '<button class="ll-card-btn" onclick="event.stopPropagation();window.llQuickStatus(\'' + taskId + '\',\'in-progress\',this)">&#9654; In Progress</button>' +
+      '</div>';
+  }
+
+  function projectActionsHTML(projectId) {
+    return '<div class="ll-card-actions">' +
+      '<button class="ll-card-btn" onclick="event.stopPropagation();window.llEditProject(\'' + projectId + '\')">&#9998; Edit</button>' +
+      '</div>';
+  }
+
+  function ideaActionsHTML(ideaId) {
+    return '<div class="ll-card-actions">' +
+      '<button class="ll-card-btn" onclick="event.stopPropagation();window.llEditIdea(\'' + ideaId + '\')">&#9998; Edit</button>' +
+      '</div>';
+  }
+
+  function goalActionsHTML(goalId) {
+    return '<div class="ll-card-actions">' +
+      '<button class="ll-card-btn" onclick="event.stopPropagation();window.llEditGoal(\'' + goalId + '\')">&#9998; Edit</button>' +
+      '</div>';
+  }
+
+  function habitActionsHTML(habitId, habitName) {
+    var today = new Date().toISOString().split('T')[0];
+    return '<div class="ll-card-actions">' +
+      '<button class="ll-card-btn btn-check" onclick="event.stopPropagation();window.llCheckHabit(\'' + escapeHtml(habitId) + '\',\'' + escapeHtml(habitName) + '\',this)">&#10003; Check In Today</button>' +
+      '<button class="ll-card-btn" onclick="event.stopPropagation();window.llEditHabit(\'' + escapeHtml(habitId) + '\')">&#9998; Edit</button>' +
+      '</div>';
+  }
+
+  // =========================================
+  // GLOBAL FUNCTIONS (called from inline HTML)
+  // =========================================
+
+  window.llEditTask = async function(taskId) {
+    var data = await loadSiteData();
+    if (!data) return;
+    var task = (data.tasks || []).find(function(t) { return t.id === taskId; });
+    if (task) showEditTaskModal(task);
+  };
+
+  window.llEditProject = async function(projectId) {
+    var data = await loadSiteData();
+    if (!data) return;
+    var project = (data.projects || []).find(function(p) { return p.id === projectId; });
+    if (project) showEditProjectModal(project);
+  };
+
+  window.llEditIdea = async function(ideaId) {
+    var data = await loadSiteData();
+    if (!data) return;
+    var idea = (data.ideas || []).find(function(i) { return i.id === ideaId; });
+    if (idea) showEditIdeaModal(idea);
+  };
+
+  window.llEditGoal = async function(goalId) {
+    var data = await loadSiteData();
+    if (!data) return;
+    var goal = (data.goals || []).find(function(g) { return g.id === goalId; });
+    if (goal) showEditGoalModal(goal);
+  };
+
+  window.llEditHabit = async function(habitId) {
+    var data = await loadSiteData();
+    if (!data) return;
+    var habit = (data.habits || []).find(function(h) { return h.id === habitId; });
+    if (habit) showEditHabitModal(habit);
+  };
+
+  window.llQuickStatus = function(taskId, newStatus, btnEl) {
+    quickAction(btnEl,
+      'Update Task: ' + taskId,
+      '### Task ID\n\n' + taskId + '\n\n### New Status\n\n' + newStatus,
+      'Task \u2192 ' + newStatus
+    );
+  };
+
+  window.llCheckHabit = function(habitId, habitName, btnEl) {
+    var today = new Date().toISOString().split('T')[0];
+    quickAction(btnEl,
+      'Check Habit: ' + (habitName || habitId),
+      '### Habit ID\n\n' + habitId + '\n\n### Check Date\n\n' + today,
+      'Habit checked in'
+    );
+  };
+
+  // Expose action HTML builders so pages can use them
+  window.llTaskActions = taskActionsHTML;
+  window.llProjectActions = projectActionsHTML;
+  window.llIdeaActions = ideaActionsHTML;
+  window.llGoalActions = goalActionsHTML;
+  window.llHabitActions = habitActionsHTML;
+
+  // =========================================
+  // SCROLL-TRIGGERED ANIMATIONS
+  // =========================================
+
+  function initScrollAnimations() {
+    if (!('IntersectionObserver' in window)) return;
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('ll-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+
+    // Observe all animatable elements
+    var selectors = '.task-card,.project-card,.idea-card,.goal-card,.habit-card,.log-entry,.dep-graph-row,.stat-card,.chart-container,.section,.streak-card';
+    document.querySelectorAll(selectors).forEach(function(el) {
+      el.classList.add('ll-scroll-animate');
+      observer.observe(el);
+    });
+  }
+
+  // Re-observe after dynamic content loads
+  window.llInitScrollAnimations = initScrollAnimations;
+
+  // =========================================
+  // RELATIVE TIMESTAMPS (auto-updating)
+  // =========================================
+
+  function getRelativeTime(dateStr) {
+    if (!dateStr) return '';
+    var d = new Date(dateStr);
+    var now = new Date();
+    var diff = now - d;
+    var secs = Math.floor(diff / 1000);
+    var mins = Math.floor(secs / 60);
+    var hours = Math.floor(mins / 60);
+    var days = Math.floor(hours / 24);
+
+    if (secs < 60) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    if (hours < 24) return hours + 'h ago';
+    if (days === 1) return 'yesterday';
+    if (days < 7) return days + 'd ago';
+    if (days < 30) return Math.floor(days / 7) + 'w ago';
+    if (days < 365) return Math.floor(days / 30) + 'mo ago';
+    return Math.floor(days / 365) + 'y ago';
+  }
+
+  function updateRelativeTimestamps() {
+    document.querySelectorAll('[data-relative-time]').forEach(function(el) {
+      el.textContent = getRelativeTime(el.getAttribute('data-relative-time'));
+    });
+  }
+
+  // Update every 60 seconds
+  setInterval(updateRelativeTimestamps, 60000);
+
+  // Expose for use in pages
+  window.llRelativeTime = getRelativeTime;
+
+  // =========================================
+  // ADD MODAL (tabbed create form)
+  // =========================================
 
   async function showAddModal(defaultTab) {
     var data = await loadSiteData();
@@ -331,7 +712,26 @@
 
   function registerServiceWorker() { if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function() {}); }
 
-  function init() { injectStyles(); injectNavButtons(); registerServiceWorker(); }
+  function injectScrollAnimationStyles() {
+    var s = document.createElement('style');
+    s.id = 'll-scroll-styles';
+    s.textContent = [
+      '.ll-scroll-animate{opacity:0;transform:translateY(16px);transition:opacity 0.4s cubic-bezier(0.4,0,0.2,1),transform 0.4s cubic-bezier(0.4,0,0.2,1)}',
+      '.ll-scroll-animate.ll-visible{opacity:1;transform:translateY(0)}'
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  function init() {
+    injectStyles();
+    injectScrollAnimationStyles();
+    injectNavButtons();
+    registerServiceWorker();
+    // Delay scroll animation init so page content loads first
+    setTimeout(initScrollAnimations, 500);
+    // Initial relative timestamp update
+    setTimeout(updateRelativeTimestamps, 100);
+  }
 
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
 })();

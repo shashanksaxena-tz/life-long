@@ -228,10 +228,11 @@ function renderTasks(tasks) {
         (t.due && t.status !== 'done' ? '<span class="task-due ' + dueClass + '">' + LL.relativeDate(t.due) + '</span>' : '') +
         (t.time_spent ? '<span class="time-badge">' + t.time_spent + '</span>' : '') +
         (t.blocked_by ? '<span class="dep-badge">blocked by ' + t.blocked_by + '</span>' : '') +
-        '<span>Updated ' + LL.formatDate(t.updated || t.created) + '</span>' +
+        '<span data-relative-time="' + (t.updated || t.created) + '">' + LL.formatDate(t.updated || t.created) + '</span>' +
       '</div>' +
       (tags ? '<div class="task-tags">' + tags + '</div>' : '') +
       (hasBody ? '<div class="task-body">' + LL.renderMarkdown(t.body) + '</div>' : '') +
+      (window.llTaskActions ? window.llTaskActions(t.id) : '') +
     '</div>';
   }).join('');
 }

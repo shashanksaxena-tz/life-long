@@ -212,6 +212,7 @@ function renderHabits(habits) {
         '<span class="badge ' + statusBadgeClass + '">' + (habit.status || 'active') + '</span>' +
         tags +
       '</div>' +
+      (window.llHabitActions ? window.llHabitActions(habit.id, habit.name || habit.id) : '') +
     '</div>';
   }).join('');
 }

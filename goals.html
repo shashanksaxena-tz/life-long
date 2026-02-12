@@ -146,6 +146,7 @@ function renderGoals(goals) {
       (tags ? '<div class="goal-tags">' + tags + '</div>' : '') +
       progressHtml +
       (hasBody ? '<div class="goal-body">' + LL.renderMarkdown(goal.body) + '</div>' : '') +
+      (window.llGoalActions ? window.llGoalActions(goal.id) : '') +
     '</div>';
   }).join('');
 }

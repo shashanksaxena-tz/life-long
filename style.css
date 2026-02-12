@@ -2038,39 +2038,9 @@ h2 {
 .skeleton-line.medium { width: 65%; }
 .skeleton-line.long { width: 85%; }
 
-/* --- Card Entrance Animation --- */
-@keyframes cardEnter {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.task-card,
-.project-card,
-.idea-card,
-.goal-card,
-.habit-card,
-.log-entry,
-.dep-graph-row {
-  animation: cardEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-.task-card:nth-child(1), .idea-card:nth-child(1), .goal-card:nth-child(1), .habit-card:nth-child(1), .log-entry:nth-child(1), .dep-graph-row:nth-child(1) { animation-delay: 0.03s; }
-.task-card:nth-child(2), .idea-card:nth-child(2), .goal-card:nth-child(2), .habit-card:nth-child(2), .log-entry:nth-child(2), .dep-graph-row:nth-child(2) { animation-delay: 0.06s; }
-.task-card:nth-child(3), .idea-card:nth-child(3), .goal-card:nth-child(3), .habit-card:nth-child(3), .log-entry:nth-child(3), .dep-graph-row:nth-child(3) { animation-delay: 0.09s; }
-.task-card:nth-child(4), .idea-card:nth-child(4), .goal-card:nth-child(4), .habit-card:nth-child(4), .log-entry:nth-child(4), .dep-graph-row:nth-child(4) { animation-delay: 0.12s; }
-.task-card:nth-child(5), .idea-card:nth-child(5), .goal-card:nth-child(5), .habit-card:nth-child(5), .log-entry:nth-child(5), .dep-graph-row:nth-child(5) { animation-delay: 0.15s; }
-.task-card:nth-child(6), .idea-card:nth-child(6), .goal-card:nth-child(6), .habit-card:nth-child(6), .log-entry:nth-child(6) { animation-delay: 0.18s; }
-.task-card:nth-child(7), .idea-card:nth-child(7) { animation-delay: 0.21s; }
-.task-card:nth-child(8), .idea-card:nth-child(8) { animation-delay: 0.24s; }
-.task-card:nth-child(9) { animation-delay: 0.27s; }
-.task-card:nth-child(10) { animation-delay: 0.3s; }
-.task-card:nth-child(n+11) { animation-delay: 0.33s; }
+/* --- Card Entrance Animation (scroll-triggered via IntersectionObserver in app.js) ---
+   Cards use .ll-scroll-animate and .ll-visible classes injected by JS.
+   No CSS-only animation needed here. */
 
 /* --- Markdown Checkbox Lists --- */
 .md-checkbox {
