@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-12T10:16:04.545425",
+  "generated_at": "2026-02-23T10:44:54.448497",
   "stats": {
     "total_projects": 12,
     "active_projects": 10,
@@ -7,7 +7,7 @@
     "done_tasks": 8,
     "in_progress_tasks": 7,
     "todo_tasks": 6,
-    "overdue_tasks": 0,
+    "overdue_tasks": 7,
     "due_soon_tasks": 1,
     "priority_counts": {
       "critical": 2,
@@ -17,7 +17,7 @@
     },
     "total_ideas": 6,
     "total_logs": 8,
-    "logs_this_week": 7,
+    "logs_this_week": 0,
     "total_goals": 4,
     "active_goals": 3,
     "total_habits": 5,

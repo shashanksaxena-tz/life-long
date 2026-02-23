@@ -5,42 +5,252 @@
     <description>Activity feed for the Life Long project tracking system. Includes tasks, logs, and ideas.</description>
     <link>https://life-long.github.io</link>
     <language>en-us</language>
-    <lastBuildDate>Wed, 11 Feb 2026 17:09:26 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 23 Feb 2026 10:44:54 +0000</lastBuildDate>
     <generator>Life Long RSS Generator</generator>
     <item>
-      <title>[Task/done] Fix JWT refresh expiry bug</title>
-      <description>Description Refresh token expired incorrectly after 15 mins. Logs - 2026-02-11: Investigated issue. - 2026-02-11: Patched expiry logic.</description>
+      <title>[Task/todo] Design event schema and data model</title>
+      <description>Objective Define the schema for analytics event ingestion and storage in ClickHouse. Requirements - Support arbitrary event properties (semi-structured) - Efficient time-series queries - Partition by...</description>
       <link>https://life-long.github.io/tasks.html</link>
-      <guid isPermaLink="false">task-task-2026-001</guid>
-      <pubDate>Wed, 11 Feb 2026 12:00:00 +0000</pubDate>
+      <guid isPermaLink="false">task-task-2026-003</guid>
+      <pubDate>Thu, 12 Feb 2026 12:00:00 +0000</pubDate>
     </item>
     <item>
-      <title>[Task/in-progress] Build filter UI for dashboard</title>
-      <description>Description Create filterable table UI for the admin dashboard. Logs - 2026-02-11: Built initial filter UI components.</description>
+      <title>[Task/in-progress] Add push notifications for due dates</title>
+      <description>Implementation - Firebase Cloud Messaging for cross-platform - Notification triggers: 1 day before, 1 hour before, at due time - Deep link to task detail from notification Progress - [x] FCM setup...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-012</guid>
+      <pubDate>Thu, 12 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/in-progress] Write load test for token endpoint</title>
+      <description>Test Plan Using **k6** for load testing the `/auth/token` endpoint. Scenarios 1. **Baseline**: 100 RPS for 5 minutes 2. **Ramp-up**: 0 → 500 RPS over 10 minutes 3. **Spike**: 1000 RPS burst for 30...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-017</guid>
+      <pubDate>Thu, 12 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/todo] Revamp AO Portal</title>
+      <description>Description Revamp - [ ] UI revamp - [ ] BE revamp - [ ] AI revamp - [ ] DB revamp Logs - 2026-02-12: Created from issue #4.</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-019</guid>
+      <pubDate>Thu, 12 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/done] test task</title>
+      <description>Description test description Logs - 2026-02-12: Created from issue #8. - 2026-02-12: Status changed to todo (via issue #9). - 2026-02-12: Status changed to todo (via issue #10). - 2026-02-12: Status...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-020</guid>
+      <pubDate>Thu, 12 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/in-progress] Test 15</title>
+      <description>Description test burn down Logs - 2026-02-12: Created from issue #12. - 2026-02-12: Status changed to in-progress (via issue #15).</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-021</guid>
+      <pubDate>Thu, 12 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Log] 2026-02-12</title>
+      <description>Daily Log - Wednesday Focus Areas - Continued work on OAuth2 PKCE implementation - Started load testing auth service token endpoint - Code review for Table component PR Progress - Completed PKCE code...</description>
+      <link>https://life-long.github.io/logs.html</link>
+      <guid isPermaLink="false">log-2026-02-12</guid>
+      <pubDate>Thu, 12 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/in-progress] Implement OAuth2 PKCE flow for mobile</title>
+      <description>Description Add PKCE (Proof Key for Code Exchange) support for the OAuth2 authorization code flow, required for mobile and SPA clients. Tasks - [x] Generate code verifier and code challenge - [x]...</description>
       <link>https://life-long.github.io/tasks.html</link>
       <guid isPermaLink="false">task-task-2026-002</guid>
       <pubDate>Wed, 11 Feb 2026 12:00:00 +0000</pubDate>
     </item>
     <item>
-      <title>[Task/todo] Design data model for analytics events</title>
-      <description>Description Define the schema for analytics event ingestion and storage. Logs - 2026-02-11: Created task.</description>
+      <title>[Task/in-progress] Build Table component with sorting</title>
+      <description>Features - Column sorting (asc/desc/none) - Row selection (single and multi) - Sticky header - Virtual scrolling for 10k+ rows - Responsive collapse to card view on mobile</description>
       <link>https://life-long.github.io/tasks.html</link>
-      <guid isPermaLink="false">task-task-2026-003</guid>
+      <guid isPermaLink="false">task-task-2026-007</guid>
+      <pubDate>Wed, 11 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/todo] Build real-time dashboard prototype</title>
+      <description>Scope Create an interactive prototype for the analytics dashboard. Key Views - **Overview**: KPI cards, trend sparklines, funnel chart - **Events**: Searchable event stream with filters -...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-015</guid>
       <pubDate>Wed, 11 Feb 2026 12:00:00 +0000</pubDate>
     </item>
     <item>
       <title>[Log] 2026-02-11</title>
-      <description>Summary Worked on auth and dashboard. Entries - Fixed JWT bug (task-2026-001) - Built filter UI (task-2026-002)</description>
+      <description>Daily Log - Tuesday Achievements - Merged push notification scheduler to main - Fixed 3 accessibility issues in design system buttons - Updated mobile app CI pipeline for faster builds Key Decisions...</description>
       <link>https://life-long.github.io/logs.html</link>
       <guid isPermaLink="false">log-2026-02-11</guid>
       <pubDate>Wed, 11 Feb 2026 12:00:00 +0000</pubDate>
     </item>
     <item>
-      <title>[Idea] Idea Build AI-powered productivity intelligence system</title>
-      <description>Idea Build AI-powered productivity intelligence system.</description>
+      <title>[Idea] AI-Powered Productivity Intelligence Build an AI layer that </title>
+      <description>AI-Powered Productivity Intelligence Build an AI layer that analyzes work patterns and provides actionable insights: - **Time estimation**: Predict task completion time based on historical data -...</description>
+      <link>https://life-long.github.io/ideas.html</link>
+      <guid isPermaLink="false">idea-idea-2026-001</guid>
+      <pubDate>Wed, 11 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/in-progress] Build quick-capture voice input</title>
+      <description>Description Allow users to create tasks and log entries via voice input from the home screen widget. Progress - [x] Speech-to-text integration (Whisper API) - [x] Basic NLP parsing for task...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-005</guid>
+      <pubDate>Tue, 10 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/todo] Implement SAML SSO integration</title>
+      <description>Overview Add SAML 2.0 Single Sign-On support for enterprise customers. Requirements - SP-initiated and IdP-initiated flows - Metadata XML import/export - JIT user provisioning - Attribute mapping...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-010</guid>
+      <pubDate>Tue, 10 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Log] 2026-02-10</title>
+      <description>Daily Log - Monday Sprint Planning Planned tasks for the week: 1. Complete PKCE implementation 2. Push notification deep linking 3. Table component sorting 4. Start SAML integration research Progress...</description>
+      <link>https://life-long.github.io/logs.html</link>
+      <guid isPermaLink="false">log-2026-02-10</guid>
+      <pubDate>Tue, 10 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/in-progress] Implement offline-first data sync</title>
+      <description>Strategy Using CRDT-based sync with SQLite as local store. Architecture 1. All writes go to local SQLite first 2. Background sync service pushes changes every 15 min 3. Conflict resolution:...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-008</guid>
+      <pubDate>Mon, 09 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/todo] Set up Kafka event ingestion pipeline</title>
+      <description>Requirements - Handle 10k events/second at peak - At-least-once delivery guarantee - Dead letter queue for failed events - Schema validation on ingestion Architecture - 3-node Kafka cluster -...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-009</guid>
+      <pubDate>Mon, 09 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Log] 2026-02-09</title>
+      <description>Daily Log - Sunday Weekend Project Spent time researching Kafka best practices for the analytics pipeline: - Partition strategy: hash by `user_id` for ordering guarantee - Retention: 7 days for raw...</description>
+      <link>https://life-long.github.io/logs.html</link>
+      <guid isPermaLink="false">log-2026-02-09</guid>
+      <pubDate>Mon, 09 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Idea] Self-Healing Infrastructure Automate common failure recovery</title>
+      <description>Self-Healing Infrastructure Automate common failure recovery patterns: 1. Auto-restart crashed services with health check validation 2. Auto-scale based on queue depth, not just CPU 3. Automated...</description>
+      <link>https://life-long.github.io/ideas.html</link>
+      <guid isPermaLink="false">idea-idea-2026-002</guid>
+      <pubDate>Mon, 09 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/done] Design home screen widget</title>
+      <description>Widget Sizes - **Small** (2x2): Shows next due task + quick capture button - **Medium** (4x2): Today's tasks list (up to 4 items) - **Large** (4x4): Tasks + progress ring + streak counter Design...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-018</guid>
+      <pubDate>Sun, 08 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Log] 2026-02-08</title>
+      <description>Daily Log - Saturday Progress - Completed home screen widget designs (all 3 sizes) - Sketched analytics dashboard wireframes - Set up Storybook for design system documentation Design Decisions -...</description>
+      <link>https://life-long.github.io/logs.html</link>
+      <guid isPermaLink="false">log-2026-02-08</guid>
+      <pubDate>Sun, 08 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/todo] Document all components in Storybook</title>
+      <description>Scope - Interactive examples for each component variant - Props table with TypeScript types - Accessibility notes - Usage guidelines and dos/don'ts - Copy-paste code snippets</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-011</guid>
+      <pubDate>Sat, 07 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Log] 2026-02-07</title>
+      <description>Daily Log - Friday Accomplishments - Shipped rate limiting to production - Created documentation task for Storybook - Merged button component variants Metrics - Auth service: 99.98% uptime this week...</description>
+      <link>https://life-long.github.io/logs.html</link>
+      <guid isPermaLink="false">log-2026-02-07</guid>
+      <pubDate>Sat, 07 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Idea] Collaborative Workspaces Add real-time collaboration feature</title>
+      <description>Collaborative Workspaces Add real-time collaboration features: - **Shared projects** with role-based permissions - **Live cursors** showing who's editing what - **Comments and threads** on tasks -...</description>
       <link>https://life-long.github.io/ideas.html</link>
       <guid isPermaLink="false">idea-idea-2026-003</guid>
-      <pubDate>Wed, 11 Feb 2026 12:00:00 +0000</pubDate>
+      <pubDate>Sat, 07 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/done] Fix JWT refresh token expiry bug</title>
+      <description>Problem Refresh tokens were expiring after 15 minutes instead of 7 days due to a misconfigured TTL in the Redis store. Root Cause The `REFRESH_TOKEN_TTL` env var was being parsed as **minutes**...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-001</guid>
+      <pubDate>Thu, 05 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Log] 2026-02-05</title>
+      <description>Daily Log - Wednesday Fixed - **Critical**: JWT refresh token expiry bug (task-2026-001) - Tokens were expiring in 15 min instead of 7 days - Root cause: TTL parsed as minutes instead of seconds -...</description>
+      <link>https://life-long.github.io/logs.html</link>
+      <guid isPermaLink="false">log-2026-02-05</guid>
+      <pubDate>Thu, 05 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Idea] Edge-First Architecture Move computation closer to users: - </title>
+      <description>Edge-First Architecture Move computation closer to users: - Deploy API to Cloudflare Workers (edge runtime) - Use Durable Objects for stateful sessions - Cache frequently accessed data at edge -...</description>
+      <link>https://life-long.github.io/ideas.html</link>
+      <guid isPermaLink="false">idea-idea-2026-004</guid>
+      <pubDate>Thu, 05 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Log] 2026-02-03</title>
+      <description>Daily Log - Monday Sprint Kickoff - Planned auth service security hardening sprint - Identified JWT refresh bug from user reports - Prioritized mobile app offline sync Tasks Created - JWT refresh...</description>
+      <link>https://life-long.github.io/logs.html</link>
+      <guid isPermaLink="false">log-2026-02-03</guid>
+      <pubDate>Tue, 03 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Idea] Gesture-Based Task Management Natural gesture shortcuts for </title>
+      <description>Gesture-Based Task Management Natural gesture shortcuts for mobile app: - **Swipe right**: Mark task as done - **Swipe left**: Snooze to tomorrow - **Long press + drag**: Reorder priorities -...</description>
+      <link>https://life-long.github.io/ideas.html</link>
+      <guid isPermaLink="false">idea-idea-2026-005</guid>
+      <pubDate>Tue, 03 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/done] Add rate limiting to login endpoints</title>
+      <description>Implementation Added sliding window rate limiting using Redis. - **Limit**: 5 login attempts per IP per minute - **Lockout**: 15 minute cooldown after limit exceeded - **Headers**: Returns...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-004</guid>
+      <pubDate>Mon, 02 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Idea] Personal Knowledge Graph Build a knowledge graph connecting </title>
+      <description>Personal Knowledge Graph Build a knowledge graph connecting all entities: - Tasks linked to projects, people, and concepts - Auto-extract entities from log entries and notes - Graph visualization for...</description>
+      <link>https://life-long.github.io/ideas.html</link>
+      <guid isPermaLink="false">idea-idea-2026-006</guid>
+      <pubDate>Sun, 01 Feb 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/done] Create Button component variants</title>
+      <description>Variants - **Primary**: Solid fill, high emphasis - **Secondary**: Outline, medium emphasis - **Ghost**: No background, low emphasis - **Destructive**: Red, for dangerous actions Sizes - `sm` (28px),...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-006</guid>
+      <pubDate>Fri, 30 Jan 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/done] Implement dark/light theme tokens</title>
+      <description>Token System Created a comprehensive token system with 12-step color scales. Color Scales - **Gray**: 12 steps from #09090b to #fafafa - **Blue**: 12 steps from #0c1929 to #eff6ff - **Green**: 12...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-016</guid>
+      <pubDate>Thu, 22 Jan 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/done] Add circuit breaker pattern</title>
+      <description>Implementation Added circuit breaker using **opossum** library. States - **Closed**: Normal operation, requests flow through - **Open**: Failures exceeded threshold, requests short-circuited (503) -...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-013</guid>
+      <pubDate>Sat, 10 Jan 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>[Task/done] Implement request/response transformation</title>
+      <description>Features - Header injection/removal - Body transformation via JSON templates - Query parameter mapping - Path rewriting with regex support Use Cases - API versioning without backend changes - Adding...</description>
+      <link>https://life-long.github.io/tasks.html</link>
+      <guid isPermaLink="false">task-task-2026-014</guid>
+      <pubDate>Sat, 20 Dec 2025 12:00:00 +0000</pubDate>
     </item>
   </channel>
 </rss>
