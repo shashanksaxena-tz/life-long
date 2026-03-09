@@ -5,7 +5,7 @@
     <description>Activity feed for the Life Long project tracking system. Includes tasks, logs, and ideas.</description>
     <link>https://life-long.github.io</link>
     <language>en-us</language>
-    <lastBuildDate>Mon, 02 Mar 2026 10:39:11 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 09 Mar 2026 10:40:56 +0000</lastBuildDate>
     <generator>Life Long RSS Generator</generator>
     <item>
       <title>[Task/todo] Design event schema and data model</title>

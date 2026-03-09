@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-02T10:39:11.919880",
+  "generated_at": "2026-03-09T10:40:56.938815",
   "stats": {
     "total_projects": 12,
     "active_projects": 10,
@@ -7,8 +7,8 @@
     "done_tasks": 8,
     "in_progress_tasks": 7,
     "todo_tasks": 6,
-    "overdue_tasks": 9,
-    "due_soon_tasks": 1,
+    "overdue_tasks": 10,
+    "due_soon_tasks": 0,
     "priority_counts": {
       "critical": 2,
       "high": 7,
